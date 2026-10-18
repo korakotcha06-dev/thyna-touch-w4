@@ -850,8 +850,96 @@ const SAMPLE_ERRORS = {
   session_expired: 'กรุณาเข้าสู่ระบบ Claude ใหม่ แล้วลองอีกครั้ง',
 };
 
+// สรุปอัตโนมัติจากตัวเลขใน JSON ไม่ต้องเรียก Claude ใช้ได้กับทุกคนที่เปิดลิงก์
+// ทุกตัวเลขในข้อความมาจากค่าใน JSON ตรง ๆ (จัดรูปแบบคอมมาเท่านั้น)
+const fmtNum = (v) => typeof v === 'number' ? v.toLocaleString('en-US', { maximumFractionDigits: 2 }) : v;
+
+function autoReport(json) {
+  const j = (k) => json[k];
+  const has = (k) => json[k] != null;
+  const channels = Object.keys(json).filter((k) => k.startsWith('สัดส่วนช่องทาง_'))
+    .map((k) => ({ name: k.replace('สัดส่วนช่องทาง_', '').replace(/_pct$/, ''), pct: json[k] }))
+    .sort((a, b) => b.pct - a.pct);
+  const sections = [];
+  if (!has('ยอดขายสุทธิ_บาท')) return { sections, recommendations: [] };
+  sections.push({ heading: 'ภาพรวมยอดขาย', bullets: [
+    `ยอดขายสุทธิ ${fmtNum(j('ยอดขายสุทธิ_บาท'))} บาท จากคำสั่งซื้อที่จัดส่งสำเร็จ ${fmtNum(j('คำสั่งซื้อสำเร็จ'))} รายการ`,
+    `ยอดเฉลี่ยต่อคำสั่งซื้อ (AOV) ${fmtNum(j('AOV_บาท'))} บาท`,
+    `ข้อมูล ${j('ช่วงข้อมูล_เริ่ม')} ถึง ${j('ช่วงข้อมูล_สิ้นสุด')} · ${j('ตัวกรอง_ภูมิภาค')} · ${j('ตัวกรอง_หมวดสินค้า')} · ${j('ตัวกรอง_ช่วงเดือน')}`,
+  ] });
+  sections.push({ heading: 'แนวโน้มรายเดือน', bullets: [
+    `เดือนที่ยอดขายสูงสุดคือ ${j('เดือนยอดสูงสุด')} ที่ ${fmtNum(j('ยอดเดือนสูงสุด_บาท'))} บาท`,
+    `เดือนที่ยอดขายต่ำสุดคือ ${j('เดือนยอดต่ำสุด')} ที่ ${fmtNum(j('ยอดเดือนต่ำสุด_บาท'))} บาท`,
+  ] });
+  if (channels.length) sections.push({ heading: 'ช่องทางการขาย', bullets: channels.map((c, i) =>
+    i === 0 ? `ช่องทางหลักคือ ${c.name} คิดเป็น ${fmtNum(c.pct)}% ของยอดขายสุทธิ` : `${c.name} คิดเป็น ${fmtNum(c.pct)}%`) });
+  if (has('ขนส่งยอดสูงสุด')) sections.push({ heading: 'การขนส่ง', bullets: [
+    `${j('ขนส่งยอดสูงสุด')} ส่งสินค้าที่มียอดขายสุทธิมากที่สุด คิดเป็น ${fmtNum(j('สัดส่วนขนส่งยอดสูงสุด_pct'))}%`,
+  ] });
+  const oneRegion = j('ตัวกรอง_ภูมิภาค') !== 'ทุกภูมิภาค';
+  if (has('ภูมิภาคยอดสูงสุด')) sections.push({ heading: 'ภูมิภาคและจังหวัด', bullets: [
+    oneRegion
+      ? `รายงานนี้แสดงเฉพาะ${j('ภูมิภาคยอดสูงสุด')}`
+      : `${j('ภูมิภาคยอดสูงสุด')} มียอดขายสูงสุด คิดเป็น ${fmtNum(j('สัดส่วนภูมิภาคยอดสูงสุด_pct'))}% ของยอดขายสุทธิ`,
+    `จังหวัดที่ขายดีที่สุดใน${oneRegion ? '' : 'ภูมิภาคนี้'}คือ ${j('จังหวัดยอดสูงสุดในภูมิภาคนั้น')}`.replace('ดีที่สุดในคือ', 'ดีที่สุดคือ'),
+  ] });
+  sections.push({ heading: 'การยกเลิกและการคืนสินค้า', bullets: [
+    `อัตรายกเลิกคำสั่งซื้อ ${fmtNum(j('อัตรายกเลิก_pct'))}%`,
+    `อัตราคืนสินค้า ${fmtNum(j('อัตราคืนสินค้า_pct'))}%`,
+  ] });
+  if (has('สัดส่วนยอดวันเมกะเซล_pct')) sections.push({ heading: 'วันเมกะเซลเทียบวันปกติ', bullets: [
+    `วันเมกะเซลมีสัดส่วน ${fmtNum(j('สัดส่วนยอดวันเมกะเซล_pct'))}% ของยอดขายสุทธิ`,
+    `ยอดเฉลี่ยต่อวัน: วันเมกะเซล ${fmtNum(j('ยอดเฉลี่ยต่อวัน_วันเมกะเซล_บาท'))} บาท เทียบวันปกติ ${fmtNum(j('ยอดเฉลี่ยต่อวัน_วันปกติ_บาท'))} บาท`,
+  ] });
+  if (has('กำไรขั้นต้นรวม_pct')) sections.push({ heading: 'กำไรขั้นต้น', bullets: [
+    `กำไรขั้นต้นรวม ${fmtNum(j('กำไรขั้นต้นรวม_pct'))}% ของยอดขายสุทธิ`,
+    `วันเมกะเซล ${fmtNum(j('กำไรขั้นต้นวันเมกะเซล_pct'))}% เทียบวันปกติ ${fmtNum(j('กำไรขั้นต้นวันปกติ_pct'))}%`,
+  ] });
+
+  // ข้อเสนอแนะแบบเหตุและผล เลือกตามตัวเลขที่เป็นประเด็น
+  const recs = [];
+  if (has('กำไรขั้นต้นวันเมกะเซล_pct') && j('กำไรขั้นต้นวันเมกะเซล_pct') < j('กำไรขั้นต้นวันปกติ_pct')) recs.push({
+    issue: 'กำไรวันเมกะเซลต่ำ',
+    cause: `กำไรขั้นต้นวันเมกะเซล ${fmtNum(j('กำไรขั้นต้นวันเมกะเซล_pct'))}% ต่ำกว่าวันปกติ ${fmtNum(j('กำไรขั้นต้นวันปกติ_pct'))}%`,
+    effect: 'ขายได้มากขึ้นแต่กำไรต่อบาทลดลง',
+    action: 'ลดราคาลึกเฉพาะสินค้ากำไรสูง หรือใช้คูปองยอดขั้นต่ำแทน' });
+  recs.push({
+    issue: 'การยกเลิกคำสั่งซื้อ',
+    cause: `อัตรายกเลิกอยู่ที่ ${fmtNum(j('อัตรายกเลิก_pct'))}%`,
+    effect: 'ยอดขายหายไปก่อนจัดส่ง',
+    action: 'ยืนยันสต็อกและแจ้งเวลาส่งก่อนชำระเงิน' });
+  recs.push({
+    issue: 'การคืนสินค้า',
+    cause: `อัตราคืนสินค้าอยู่ที่ ${fmtNum(j('อัตราคืนสินค้า_pct'))}%`,
+    effect: 'เสียค่าส่งขากลับและต้นทุนจัดการ',
+    action: 'ปรับรูปและรายละเอียดสินค้าให้ตรงของจริง' });
+  if (channels.length && channels[0].pct >= 40) recs.push({
+    issue: 'พึ่งพาช่องทางเดียว',
+    cause: `ยอดขายมาจาก ${channels[0].name} ถึง ${fmtNum(channels[0].pct)}%`,
+    effect: 'ถ้าช่องทางนี้สะดุด ยอดรวมกระทบมาก',
+    action: 'กระจายโปรโมชันไปช่องทางรอง' });
+  return { sections, recommendations: recs.slice(0, 3) };
+}
+
+// บทสรุป 5 บรรทัดจากรายงานอัตโนมัติ
+function autoLines(json) {
+  const r = autoReport(json);
+  if (!r.sections.length) return [];
+  const get = (h) => (r.sections.find((s) => s.heading === h) || { bullets: [] }).bullets;
+  const rec = r.recommendations[0];
+  return [
+    `${get('ภาพรวมยอดขาย')[0]} AOV ${fmtNum(json['AOV_บาท'])} บาท`,
+    `${get('แนวโน้มรายเดือน')[0]} และ${get('แนวโน้มรายเดือน')[1]}`,
+    [get('ช่องทางการขาย')[0], get('ภูมิภาคและจังหวัด')[0]].filter(Boolean).join(' · '),
+    `อัตรายกเลิก ${fmtNum(json['อัตรายกเลิก_pct'])}% และอัตราคืนสินค้า ${fmtNum(json['อัตราคืนสินค้า_pct'])}%`,
+    rec ? `ข้อเสนอแนะ: ${rec.action} (${rec.cause})` : '',
+  ].filter(Boolean);
+}
+
 function ExecSummary({ sample, json }) {
   const [state, setState] = useState({ status: 'idle', text: '', bad: [] });
+  const jsonKey = JSON.stringify(json);
+  useEffect(() => { setState({ status: 'idle', text: '', bad: [] }); }, [jsonKey]);   // ตัวกรองเปลี่ยน = กลับไปใช้สรุปอัตโนมัติ
   const run = async () => {
     const prompt = [
       'คุณเป็นนักวิเคราะห์ที่เขียนสรุปให้ผู้บริหารร้านออนไลน์ "บ้านสบาย ช็อป"',
@@ -873,15 +961,19 @@ function ExecSummary({ sample, json }) {
       setState({ status: 'error', text: e.text || '', bad: [], msg: SAMPLE_ERRORS[e.code] || 'สรุปไม่สำเร็จ ลองกดอีกครั้ง' });
     }
   };
-  const lines = state.text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const claudeLines = state.text.split('\n').map((l) => l.trim()).filter(Boolean);
   const busy = state.status === 'thinking' || state.status === 'writing';
+  const useAuto = state.status === 'idle' || (state.status === 'error' && !claudeLines.length);
+  const lines = useAuto ? autoLines(json) : claudeLines;
   return html`<div class="card exec">
     <div class="exec-head">
       <div>
         <h2>บทสรุปสำหรับผู้บริหาร</h2>
-        <p class="note">ส่งเฉพาะตัวเลขสรุป ${Object.keys(json).length} ค่าให้ Claude ไม่ส่งข้อมูลรายแถว</p>
+        <p class="note">${useAuto
+          ? 'สรุปอัตโนมัติจากตัวเลข เห็นได้ทุกคนที่เปิดลิงก์'
+          : `เขียนโดย Claude จากตัวเลขสรุป ${Object.keys(json).length} ค่า ไม่ส่งข้อมูลรายแถว`}</p>
       </div>
-      <button class="btn" disabled=${busy} onClick=${run}>${busy ? 'กำลังสรุป…' : state.status === 'done' ? 'สรุปใหม่' : 'สรุปให้ผู้บริหาร'}</button>
+      ${sample && html`<button class="btn" disabled=${busy} onClick=${run}>${busy ? 'กำลังสรุป…' : state.status === 'done' ? 'ให้ Claude เขียนใหม่' : 'ให้ Claude สรุปให้ผู้บริหาร'}</button>`}
     </div>
     ${state.status === 'thinking' && html`<p class="note">Claude กำลังคิด…</p>`}
     ${lines.length > 0 && html`<ol class="exec-lines">${lines.map((l, i) => html`<li key=${i}>${l}</li>`)}</ol>`}
@@ -891,7 +983,7 @@ function ExecSummary({ sample, json }) {
         ? `พบตัวเลขที่ไม่อยู่ใน JSON: ${state.bad.join(', ')} ลองกดสรุปใหม่`
         : 'ตรวจแล้ว: ทุกตัวเลขในบทสรุปมีอยู่ใน JSON'}${lines.length !== 5 ? ` · ได้ ${lines.length} บรรทัด ไม่ใช่ 5` : ''}
     </p>`}
-    <details class="json-view"><summary>ดู JSON ที่ส่งให้ Claude</summary><pre>${JSON.stringify(json, null, 2)}</pre></details>
+    <details class="json-view"><summary>ดู JSON ตัวเลขสรุป (${Object.keys(json).length} ค่า)</summary><pre>${JSON.stringify(json, null, 2)}</pre></details>
   </div>`;
 }
 
@@ -1001,7 +1093,7 @@ async function buildPdf(paper) {
   return pdf.output('blob');
 }
 
-function ReportPaper({ json, report, paperRef, sources }) {
+function ReportPaper({ json, report, paperRef, sources, author }) {
   const { sections, recommendations } = report;
   const kpis = [
     ['ยอดขายสุทธิ', json['ยอดขายสุทธิ_บาท'] != null ? baht(json['ยอดขายสุทธิ_บาท'], 0) : '—'],
@@ -1032,18 +1124,39 @@ function ReportPaper({ json, report, paperRef, sources }) {
         <p><span class="tag">ข้อเสนอ</span>${r.action}</p>
       </div></li>`)}</ul>
     </section>`}
-    <footer data-block>สร้างเมื่อ ${thaiToday()} · คำนวณจาก ${sources} · ข้อความเขียนโดย Claude จากตัวเลขสรุป ${Object.keys(json).length} ค่า</footer>
+    <footer data-block>สร้างเมื่อ ${thaiToday()} · คำนวณจาก ${sources} · ${author === 'claude' ? `ข้อความเขียนโดย Claude จากตัวเลขสรุป ${Object.keys(json).length} ค่า` : `สรุปอัตโนมัติจากตัวเลขสรุป ${Object.keys(json).length} ค่า`}</footer>
   </div>`;
 }
 
 const MAX_WORDS_PER_TOPIC = 100;
 
+// ตรวจรายงาน: ตัวเลขทุกตัวต้องมีใน JSON และแต่ละหัวข้อไม่เกิน MAX_WORDS_PER_TOPIC คำ
+function assessReport(report, json) {
+  const { sections, recommendations } = report;
+  const parts = [
+    ...sections.map((x) => ({ name: x.heading, text: x.bullets.join(' ') })),
+    recommendations.length && { name: 'ข้อเสนอแนะ', text: recommendations.map((r) => [r.issue, r.cause, r.effect, r.action].join(' ')).join(' ') },
+  ].filter(Boolean).map((p) => ({ ...p, words: countWords(p.text) }));
+  const all = parts.map((p) => p.text).join('\n') + '\n' + sections.map((x) => x.heading).join('\n');
+  return {
+    bad: checkNumbers(all, json),
+    over: parts.filter((p) => p.words > MAX_WORDS_PER_TOPIC),
+    maxWords: parts.length ? Math.max(...parts.map((p) => p.words)) : 0,
+  };
+}
+
 function PdfReport({ sample, downloads, json, sources }) {
-  const empty = { sections: [], recommendations: [] };
-  const [state, setState] = useState({ status: 'idle', report: empty, bad: [], over: [], maxWords: 0 });
+  const auto = useMemo(() => autoReport(json), [json]);
+  const [claude, setClaude] = useState({ status: 'idle', report: null, msg: '' });
   const [saveMsg, setSaveMsg] = useState('');
   const paperRef = useRef(null);
-  const busy = state.status === 'thinking';
+  const jsonKey = JSON.stringify(json);
+  useEffect(() => { setClaude({ status: 'idle', report: null, msg: '' }); setSaveMsg(''); }, [jsonKey]);   // ตัวกรองเปลี่ยน = กลับไปใช้รายงานอัตโนมัติ
+
+  const busy = claude.status === 'thinking';
+  const byClaude = claude.status === 'done' && claude.report;
+  const report = byClaude ? claude.report : auto;
+  const check = useMemo(() => assessReport(report, json), [report, json]);
 
   const generate = async () => {
     const topics = reportTopics(json);
@@ -1076,7 +1189,7 @@ function PdfReport({ sample, downloads, json, sources }) {
       JSON.stringify(json, null, 2),
     ].join('\n');
     setSaveMsg('');
-    setState({ status: 'thinking', report: empty, bad: [], over: [], maxWords: 0 });
+    setClaude({ status: 'thinking', report: null, msg: '' });
     try {
       const res = await sample.json(prompt);
       const str = (v) => String(v == null ? '' : v).trim();
@@ -1087,21 +1200,11 @@ function PdfReport({ sample, downloads, json, sources }) {
         .map((r) => ({ issue: str(r.issue), cause: str(r.cause), effect: str(r.effect), action: str(r.action) }))
         .filter((r) => r.issue && r.action);
       if (!sections.length) throw { code: 'invalid_json' };
-      // นับคำต่อหัวข้อ (ข้อเสนอแนะนับเป็น 1 หัวข้อ)
-      const parts = [
-        ...sections.map((x) => ({ name: x.heading, text: x.bullets.join(' ') })),
-        recommendations.length && { name: 'ข้อเสนอแนะ', text: recommendations.map((r) => [r.issue, r.cause, r.effect, r.action].join(' ')).join(' ') },
-      ].filter(Boolean).map((p) => ({ ...p, words: countWords(p.text) }));
-      const all = parts.map((p) => p.text).join('\n') + '\n' + sections.map((x) => x.heading).join('\n');
-      setState({
-        status: 'done', report: { sections, recommendations },
-        bad: checkNumbers(all, json),
-        over: parts.filter((p) => p.words > MAX_WORDS_PER_TOPIC),
-        maxWords: Math.max(...parts.map((p) => p.words)),
-      });
+      setClaude({ status: 'done', report: { sections, recommendations }, msg: '' });
     } catch (e) {
-      setState({ status: 'error', report: empty, bad: [], over: [], maxWords: 0,
-        msg: e.code === 'invalid_json' ? 'Claude ตอบกลับไม่เป็นรูปแบบที่อ่านได้ ลองกดอีกครั้ง' : (SAMPLE_ERRORS[e.code] || 'สร้างรายงานไม่สำเร็จ ลองกดอีกครั้ง') });
+      if (e && e.code === 'cancelled') return setClaude({ status: 'idle', report: null, msg: '' });
+      setClaude({ status: 'error', report: null,
+        msg: e.code === 'invalid_json' ? 'Claude ตอบกลับไม่เป็นรูปแบบที่อ่านได้ ยังแสดงรายงานอัตโนมัติอยู่' : (SAMPLE_ERRORS[e.code] || 'Claude เขียนรายงานไม่สำเร็จ ยังแสดงรายงานอัตโนมัติอยู่') });
     }
   };
 
@@ -1113,35 +1216,38 @@ function PdfReport({ sample, downloads, json, sources }) {
       await downloads.save({ filename: `บทสรุปผู้บริหาร-บ้านสบาย-${stamp}.pdf`, data: blob });
       setSaveMsg('บันทึกไฟล์ PDF แล้ว ข้อความในไฟล์เลือกและคัดลอกได้');
     } catch (e) {
-      setSaveMsg(e && e.code === 'declined' ? 'ยกเลิกการบันทึกไฟล์' : 'บันทึก PDF ไม่สำเร็จ ลองอีกครั้ง');
+      setSaveMsg(e && e.code === 'declined' ? 'ยกเลิกการบันทึกไฟล์'
+        : e && (e.code === 'unavailable' || e.code === 'not_granted') ? 'มุมมองนี้บันทึกไฟล์ไม่ได้ ลองเปิดลิงก์ขณะเข้าสู่ระบบ claude.ai'
+        : 'บันทึก PDF ไม่สำเร็จ ลองอีกครั้ง');
     }
   };
 
-  const warn = state.bad.length || state.over.length;
+  const warn = check.bad.length || check.over.length;
+  if (!report.sections.length) return null;
   return html`<div class="card exec">
     <div class="exec-head">
       <div>
         <h2>รายงาน PDF สำหรับผู้บริหาร</h2>
-        <p class="note">หัวข้อย่อยตามตัวเลขสรุป เป็น bullet ไม่เกิน ${MAX_WORDS_PER_TOPIC} คำต่อหัวข้อ ข้อเสนอแนะเขียนแบบเหตุและผล</p>
+        <p class="note">${byClaude ? 'เขียนโดย Claude' : 'สรุปอัตโนมัติจากตัวเลข เห็นได้ทุกคนที่เปิดลิงก์'} · bullet ไม่เกิน ${MAX_WORDS_PER_TOPIC} คำต่อหัวข้อ · ข้อเสนอแนะแบบเหตุและผล</p>
       </div>
       <div class="btn-row">
-        <button class="btn" disabled=${busy} onClick=${generate}>${busy ? 'กำลังเขียนรายงาน…' : state.status === 'done' ? 'เขียนรายงานใหม่' : 'สรุปให้ผู้บริหาร (PDF)'}</button>
-        ${state.status === 'done' && downloads && html`<button class="btn ghost" onClick=${save}>ดาวน์โหลด PDF</button>`}
+        ${downloads && html`<button class="btn" onClick=${save}><${Icon} name="upload" size=${14} />ดาวน์โหลด PDF</button>`}
+        ${sample && html`<button class="btn ghost" disabled=${busy} onClick=${generate}>${busy ? 'Claude กำลังเขียน…' : byClaude ? 'ให้ Claude เขียนใหม่' : 'ให้ Claude เขียนรายงาน'}</button>`}
       </div>
     </div>
-    ${busy && html`<p class="note">Claude กำลังเขียนรายงาน อาจใช้เวลาราว 1 นาที…</p>`}
-    ${state.status === 'error' && html`<p class="err-inline">${state.msg}</p>`}
-    ${state.status === 'done' && html`<p class=${'verify ' + (warn ? 'warn' : 'ok')}>
-      ${state.bad.length ? `พบตัวเลขที่ไม่อยู่ใน JSON: ${state.bad.join(', ')}` : 'ตรวจแล้ว: ทุกตัวเลขในรายงานมีอยู่ใน JSON'}
-      · ${state.over.length
-        ? `หัวข้อที่เกิน ${MAX_WORDS_PER_TOPIC} คำ: ${state.over.map((p) => `${p.name} (${p.words} คำ)`).join(', ')} ลองเขียนใหม่`
-        : `ทุกหัวข้อไม่เกิน ${MAX_WORDS_PER_TOPIC} คำ (ยาวสุด ${state.maxWords} คำ)`}
-    </p>`}
-    ${state.status === 'done' && !downloads && html`<p class="note">ดาวน์โหลด PDF ได้เมื่อเปิดหน้านี้บน claude.ai</p>`}
+    ${busy && html`<p class="note">Claude กำลังเขียนรายงาน อาจใช้เวลาราว 1 นาที ระหว่างนี้ยังแสดงรายงานอัตโนมัติ…</p>`}
+    ${claude.status === 'error' && html`<p class="err-inline">${claude.msg}</p>`}
+    <p class=${'verify ' + (warn ? 'warn' : 'ok')}>
+      ${check.bad.length ? `พบตัวเลขที่ไม่อยู่ใน JSON: ${check.bad.join(', ')}` : 'ตรวจแล้ว: ทุกตัวเลขในรายงานมีอยู่ใน JSON'}
+      · ${check.over.length
+        ? `หัวข้อที่เกิน ${MAX_WORDS_PER_TOPIC} คำ: ${check.over.map((p) => `${p.name} (${p.words} คำ)`).join(', ')}`
+        : `ทุกหัวข้อไม่เกิน ${MAX_WORDS_PER_TOPIC} คำ (ยาวสุด ${check.maxWords} คำ)`}
+    </p>
+    ${!downloads && html`<p class="note">มุมมองนี้ดาวน์โหลดไฟล์ไม่ได้ (ต้องเปิดลิงก์ขณะเข้าสู่ระบบ claude.ai) แต่ยังอ่านรายงานด้านล่างได้ครบ</p>`}
     ${saveMsg && html`<p class="note">${saveMsg}</p>`}
-    ${state.status === 'done' && html`<div class="paper-wrap">
-      <${ReportPaper} json=${json} report=${state.report} paperRef=${paperRef} sources=${sources} />
-    </div>`}
+    <div class="paper-wrap">
+      <${ReportPaper} json=${json} report=${report} paperRef=${paperRef} sources=${sources} author=${byClaude ? 'claude' : 'auto'} />
+    </div>
   </div>`;
 }
 
@@ -1468,16 +1574,12 @@ function App() {
           <button key=${id} role="tab" id=${'tab-' + id} aria-selected=${tab === id} class=${tab === id ? 'on' : ''} onClick=${() => pickTab(id)}>${label}</button>`)}
       </nav>
 
-      ${tab === 'exec' && (sample
-        ? html`<${React.Fragment}>
-            <${ExecSummary} sample=${sample} json=${summaryJson} />
-            <${PdfReport} sample=${sample} downloads=${downloads} json=${summaryJson}
-              sources=${products ? 'orders.csv และ products.csv' : 'orders.csv'} />
-          <//>`
-        : html`<div class="card"><h2>บทสรุปผู้บริหาร</h2>
-            <p class="note">ปุ่มสรุปใช้ Claude ได้เมื่อเปิดหน้านี้บน claude.ai ${products ? '' : '· อัปโหลด products.csv ในกล่องไฟล์ข้อมูลก่อน เพื่อให้รายงานมีกำไรขั้นต้น'}</p>
-            <details class="json-view" open><summary>JSON ตัวเลขสรุปที่จะส่ง (${Object.keys(summaryJson).length} ค่า)</summary><pre>${JSON.stringify(summaryJson, null, 2)}</pre></details>
-          </div>`)}
+      ${tab === 'exec' && html`<${React.Fragment}>
+        ${!products && html`<p class="note">อัปโหลด products.csv ในกล่องไฟล์ข้อมูลก่อน เพื่อให้บทสรุปมีกำไรขั้นต้น</p>`}
+        <${ExecSummary} sample=${sample} json=${summaryJson} />
+        <${PdfReport} sample=${sample} downloads=${downloads} json=${summaryJson}
+          sources=${products ? 'orders.csv และ products.csv' : 'orders.csv'} />
+      <//>`}
 
       ${tab === 'mega' && html`<${MegaTab} m=${mega} hasCost=${!!products} />`}
 
