@@ -73,10 +73,19 @@ body { background: var(--bg); color: var(--fg); font-family: var(--font-body); f
   background: var(--accent-soft); color: var(--accent); text-align: center; }
 .side-nav button.on .count { background: rgb(255 255 255 / .22); color: var(--on-accent); }
 .side-nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.side-card { margin-top: auto; background: var(--bg); border-radius: var(--r); padding: 18px 16px; display: grid; gap: 8px; text-align: center; }
-.side-card b { font-weight: 600; font-size: .95rem; line-height: 1.4; }
-.side-card p { margin: 0; font-size: .78rem; color: var(--muted); }
-.side-card .btn { background: var(--panel); color: var(--accent); border-color: var(--panel); justify-content: center; }
+.files { background: var(--bg); border-radius: var(--r); padding: 14px; display: grid; gap: 10px; }
+.files-side { margin-top: auto; }
+.files-inline { display: none; background: var(--panel); grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); }
+.files-inline .files-title { grid-column: 1 / -1; }
+.files-title { font-size: .78rem; color: var(--muted); font-weight: 500; }
+.file-slot { display: grid; grid-template-columns: 10px minmax(0, 1fr); gap: 4px 10px; align-items: start; }
+.file-dot { width: 10px; height: 10px; border-radius: 50%; margin-top: 6px; border: 2px solid var(--muted); box-sizing: border-box; }
+.file-slot.done .file-dot { background: var(--ok); border-color: var(--ok); }
+.file-info { display: grid; min-width: 0; }
+.file-info b { font-weight: 500; font-size: .88rem; }
+.file-info code { font-family: inherit; font-size: .75rem; color: var(--muted); font-weight: 400; }
+.file-info small { font-size: .75rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-slot .btn { grid-column: 2; justify-self: start; padding: 5px 12px; font-size: .82rem; }
 
 .wrap { padding-block: 24px 48px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
   display: grid; gap: 20px; align-content: start; min-width: 0; max-width: 1400px; width: 100%; box-sizing: border-box; }
@@ -167,13 +176,10 @@ select { font: inherit; font-size: .9rem; color: var(--fg); background: var(--pa
   .app { grid-template-columns: minmax(0, 1fr); }
   .side { display: none; }
   .tabs { display: flex; }
+  .files-inline { display: grid; }
   .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 }
 
-.products-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
-  background: var(--panel); border: 1px dashed var(--line); border-radius: var(--r); padding: 12px 16px; font-size: .9rem; color: var(--muted); }
-.products-bar.ok { border-style: solid; }
-.products-bar b { color: var(--fg); font-weight: 600; }
 .mega-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 16px; }
 .mega-grid .bar { grid-template-columns: 6rem 1fr; }
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -693,17 +699,10 @@ function ChannelBars({ data, total }) {
   </div>`;
 }
 
-function MegaTab({ m, hasCost, productsName, onPickProducts }) {
+function MegaTab({ m, hasCost }) {
   const pct = (v) => v == null ? '—' : v.toFixed(2) + '%';
   const gpMax = Math.max(m.mega.gpPct || 0, m.normal.gpPct || 0, 1);
   return html`<${React.Fragment}>
-    <div class=${'products-bar' + (hasCost ? ' ok' : '')}>
-      <span>${hasCost
-        ? html`ใช้ต้นทุนจาก <b>${productsName}</b>${m.missing ? ` · ${int(m.missing)} แถวไม่พบ product_id ใน products.csv จึงไม่นับในกำไรขั้นต้น` : ''}`
-        : 'อัปโหลด products.csv เพื่อคำนวณ % กำไรขั้นต้น (ใช้ unit_cost)'}</span>
-      <button class=${'btn' + (hasCost ? ' ghost' : '')} onClick=${onPickProducts}>${hasCost ? 'เปลี่ยน products.csv' : 'อัปโหลด products.csv'}</button>
-    </div>
-
     <section class="mega-grid">
       <div class="card">
         <h2>สัดส่วนยอดขายสุทธิ</h2>
@@ -756,7 +755,8 @@ function MegaTab({ m, hasCost, productsName, onPickProducts }) {
           <p class=${'diff ' + (m.mega.gpPct < m.normal.gpPct ? 'down' : 'up')}>
             วันเมกะเซล${m.mega.gpPct < m.normal.gpPct ? 'ต่ำกว่า' : 'สูงกว่า'}วันปกติ ${Math.abs(m.mega.gpPct - m.normal.gpPct).toFixed(2)} จุด
           </p>`
-        : html`<p class="empty">ต้องอัปโหลด products.csv ก่อน จึงจะเห็น % กำไรขั้นต้น</p>`}
+        : html`<p class="empty">อัปโหลด products.csv ในกล่องไฟล์ข้อมูล (คู่กับ orders.csv) เพื่อดู % กำไรขั้นต้น</p>`}
+        ${hasCost && m.missing > 0 && html`<p class="note">${int(m.missing)} แถวไม่พบ product_id ใน products.csv จึงไม่นับในกำไรขั้นต้น</p>`}
       </div>
     </section>
 
@@ -1231,6 +1231,23 @@ function KpiCard({ cls, icon, label, value, delta, spark }) {
   </div>`;
 }
 
+function FilesPanel({ file, products, onPickOrders, onPickProducts, className }) {
+  const slots = [
+    { key: 'orders', title: 'ยอดขาย', fname: 'orders.csv', need: 'จำเป็น',
+      status: file ? `${file.name} · ${int(file.total)} แถว` : 'ยังไม่ได้อัปโหลด', done: !!file, pick: onPickOrders },
+    { key: 'products', title: 'ต้นทุนสินค้า', fname: 'products.csv', need: 'ใช้คำนวณกำไรขั้นต้น',
+      status: products ? `${products.name} · ${int(products.cost.size)} สินค้า` : 'ยังไม่ได้อัปโหลด', done: !!products, pick: onPickProducts },
+  ];
+  return html`<section class=${'files ' + (className || '')} aria-label="ไฟล์ข้อมูล">
+    <span class="files-title">ไฟล์ข้อมูล</span>
+    ${slots.map((x) => html`<div class=${'file-slot' + (x.done ? ' done' : '')} key=${x.key}>
+      <span class="file-dot" aria-hidden="true"></span>
+      <span class="file-info"><b>${x.title} <code>${x.fname}</code></b><small>${x.done ? x.status : `${x.status} · ${x.need}`}</small></span>
+      <button class="btn ghost" onClick=${x.pick}><${Icon} name="upload" size=${14} />${x.done ? 'เปลี่ยน' : 'อัปโหลด'}</button>
+    </div>`)}
+  </section>`;
+}
+
 function App() {
   const [file, setFile] = useState(null);      // { name, rows, total, parseErrors }
   const [error, setError] = useState('');
@@ -1295,6 +1312,20 @@ function App() {
     });
   };
 
+  // แยกไฟล์จากหัวคอลัมน์: มี unit_cost แต่ไม่มี order_datetime = products.csv
+  const routeFile = (f) => {
+    if (!f) return;
+    Papa.parse(f, {
+      header: true, preview: 1,
+      transformHeader: (h) => h.replace(/^\uFEFF/, '').trim(),
+      complete: (res) => {
+        const cols = res.meta.fields || [];
+        (cols.includes('unit_cost') && !cols.includes('order_datetime') ? loadProducts : load)(f);
+      },
+      error: (e) => setError('อ่านไฟล์ไม่ได้: ' + e.message),
+    });
+  };
+
   const regions = useMemo(() => file ? [...new Set(file.rows.map((r) => r.region))].sort((a, b) => a.localeCompare(b, 'th')) : [], [file]);
   const categories = useMemo(() => file ? [...new Set(file.rows.map((r) => r.category))].sort((a, b) => a.localeCompare(b, 'th')) : [], [file]);
   const months = useMemo(() => file ? [...new Set(file.rows.map((r) => r.month))].filter((m) => /^\d{4}-\d{2}$/.test(m)).sort() : [], [file]);
@@ -1328,11 +1359,8 @@ function App() {
       ${NAV.map(([id, icon, label]) => html`<button key=${id} class=${tab === id && file ? 'on' : ''} disabled=${!file} onClick=${() => pickTab(id)}>
         <${Icon} name=${icon} />${label}</button>`)}
     </nav>
-    <div class="side-card">
-      <b>${file ? file.name : 'ยังไม่มีไฟล์'}</b>
-      <p>${file ? `อ่านได้ ${int(file.total)} แถว${products ? ' · มีต้นทุนสินค้า' : ''}` : 'อัปโหลด orders.csv เพื่อดูตัวเลข'}</p>
-      <button class="btn" onClick=${() => input.current.click()}><${Icon} name="upload" size=${16} />${file ? 'อัปโหลดไฟล์ใหม่' : 'เลือกไฟล์'}</button>
-    </div>
+    <${FilesPanel} className="files-side" file=${file} products=${products}
+      onPickOrders=${() => input.current.click()} onPickProducts=${() => productsInput.current.click()} />
    </aside>
    <main class="wrap">
     <header class="head">
@@ -1369,6 +1397,9 @@ function App() {
       ${picker}
     </header>
 
+    <${FilesPanel} className="files-inline" file=${file} products=${products}
+      onPickOrders=${() => input.current.click()} onPickProducts=${() => productsInput.current.click()} />
+
     ${error && html`<div class="err" role="alert">${error}</div>`}
 
     ${!file && html`<div class=${'drop' + (over ? ' over' : '')} tabindex="0" role="button" aria-label="เลือกไฟล์ orders.csv"
@@ -1376,8 +1407,9 @@ function App() {
         onKeyDown=${(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), input.current.click())}
         onDragOver=${(e) => { e.preventDefault(); setOver(true); }}
         onDragLeave=${() => setOver(false)}
-        onDrop=${(e) => { e.preventDefault(); setOver(false); load(e.dataTransfer.files[0]); }}>
+        onDrop=${(e) => { e.preventDefault(); setOver(false); [...e.dataTransfer.files].forEach(routeFile); }}>
       <h2>ลากไฟล์ orders.csv มาวาง หรือกดเพื่อเลือกไฟล์</h2>
+      <p>ลากมาพร้อมกับ products.csv ได้เลย ระบบแยกให้เองจากหัวคอลัมน์</p>
       <p>ไฟล์ CSV แบบ UTF-8 (มี BOM ได้) อ่านในเครื่องของคุณเท่านั้น ไม่มีการส่งข้อมูลออกไปที่ไหน</p>
       <span class="btn">เลือกไฟล์</span>
     </div>`}
@@ -1414,12 +1446,11 @@ function App() {
               sources=${products ? 'orders.csv และ products.csv' : 'orders.csv'} />
           <//>`
         : html`<div class="card"><h2>บทสรุปผู้บริหาร</h2>
-            <p class="note">ปุ่มสรุปใช้ Claude ได้เมื่อเปิดหน้านี้บน claude.ai ${products ? '' : '· อัปโหลด products.csv ในแท็บวันเมกะเซลก่อน เพื่อให้รายงานมีกำไรขั้นต้น'}</p>
+            <p class="note">ปุ่มสรุปใช้ Claude ได้เมื่อเปิดหน้านี้บน claude.ai ${products ? '' : '· อัปโหลด products.csv ในกล่องไฟล์ข้อมูลก่อน เพื่อให้รายงานมีกำไรขั้นต้น'}</p>
             <details class="json-view" open><summary>JSON ตัวเลขสรุปที่จะส่ง (${Object.keys(summaryJson).length} ค่า)</summary><pre>${JSON.stringify(summaryJson, null, 2)}</pre></details>
           </div>`)}
 
-      ${tab === 'mega' && html`<${MegaTab} m=${mega} hasCost=${!!products} productsName=${products && products.name}
-        onPickProducts=${() => productsInput.current.click()} />`}
+      ${tab === 'mega' && html`<${MegaTab} m=${mega} hasCost=${!!products} />`}
 
       ${tab === 'overview' && html`<${React.Fragment}>
       <section class="charts">
