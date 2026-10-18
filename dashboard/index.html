@@ -1,0 +1,1420 @@
+<meta charset="utf-8">
+<title>บ้านสบาย ยอดขาย</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Prompt:wght@400;500;600&display=swap">
+<style>
+/* Layout (ตามดีไซน์ SalesPro): sidebar ซ้าย 248px + เนื้อหาหลัก · การ์ดขาวมุมโค้ง 12px บนพื้นเทาอ่อน · สีหลักน้ำเงิน #006EFF
+   ฟอนต์ Poppins สำหรับอังกฤษ/ตัวเลข และ Prompt สำหรับภาษาไทย */
+:root {
+  --bg: #f5f5f5;
+  --panel: #ffffff;
+  --side: #ffffff;
+  --fg: #101828;
+  --muted: #667085;
+  --line: #eaecf0;
+  --accent: #006eff;
+  --accent-soft: #e8f1ff;
+  --on-accent: #ffffff;
+  --bad: #ed4048;
+  --warn: #b7791f;
+  --ok: #12a150;
+  --font-display: "Poppins", "Prompt", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Poppins", "Prompt", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --k-net: #006eff; --k-ok: #12a150; --k-aov: #e0a100; --k-cancel: #f06b72; --k-return: #f59a4a;
+  --c1: #006eff; --c2: #12a150; --c3: #e0a100; --c4: #7c5cff; --c5: #f06b72;
+  --c6: #12a3b8; --c7: #f5803e; --c8: #7d8a1e;
+  --on-color: #ffffff;
+  --r: 12px;
+  --shadow: 0 1px 2px rgb(16 24 40 / .04);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1422; --panel: #151b2c; --side: #0f172a; --fg: #ffffff; --muted: #94a3b8; --line: #1e293b;
+    --accent: #2f86ff; --accent-soft: #173a6c; --on-accent: #ffffff;
+    --bad: #f46a70; --warn: #eab84a; --ok: #3ccf7f;
+    --k-net: #4c9aff; --k-ok: #3ccf7f; --k-aov: #f2c44d; --k-cancel: #f8858b; --k-return: #f8ad6b;
+    --c1: #4c9aff; --c2: #3ccf7f; --c3: #f2c44d; --c4: #a48dff; --c5: #f8858b;
+    --c6: #4fd0e0; --c7: #f8a066; --c8: #bccb5c;
+    --on-color: #0e1422;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1422; --panel: #151b2c; --side: #0f172a; --fg: #ffffff; --muted: #94a3b8; --line: #1e293b;
+  --accent: #2f86ff; --accent-soft: #173a6c; --on-accent: #ffffff;
+  --bad: #f46a70; --warn: #eab84a; --ok: #3ccf7f;
+  --k-net: #4c9aff; --k-ok: #3ccf7f; --k-aov: #f2c44d; --k-cancel: #f8858b; --k-return: #f8ad6b;
+  --c1: #4c9aff; --c2: #3ccf7f; --c3: #f2c44d; --c4: #a48dff; --c5: #f8858b;
+  --c6: #4fd0e0; --c7: #f8a066; --c8: #bccb5c;
+  --on-color: #0e1422;
+  --shadow: none;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.55; }
+
+/* โครงหน้า: sidebar + main */
+.app { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }
+.side { background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 6px;
+  padding: 20px 16px; padding-left: max(16px, env(safe-area-inset-left, 0px)); position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.brand { display: flex; align-items: center; gap: 12px; padding: 0 4px 18px; margin: 0 -16px 10px; padding-inline: 20px; border-bottom: 1px solid var(--line); }
+.logo { width: 40px; height: 40px; border-radius: 10px; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; flex: none; }
+.brand b { display: block; font-size: 1.05rem; font-weight: 600; line-height: 1.2; }
+.brand small { color: var(--muted); font-size: .78rem; }
+.side-label { margin: 10px 8px 4px; font-size: .78rem; color: var(--muted); font-weight: 500; }
+.side-nav { display: grid; gap: 4px; }
+.side-nav button { font: inherit; display: flex; align-items: center; gap: 12px; width: 100%; border: 0; background: none; color: var(--fg);
+  padding: 11px 14px; border-radius: 10px; cursor: pointer; text-align: left; font-size: .95rem; }
+.side-nav button:hover { background: var(--accent-soft); }
+.side-nav button.on { background: var(--accent); color: var(--on-accent); }
+.side-nav button:disabled { opacity: .45; cursor: default; background: none; }
+.side-nav .count { margin-left: auto; font-size: .72rem; font-weight: 600; min-width: 24px; padding: 1px 7px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent); text-align: center; }
+.side-nav button.on .count { background: rgb(255 255 255 / .22); color: var(--on-accent); }
+.side-nav button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.side-card { margin-top: auto; background: var(--bg); border-radius: var(--r); padding: 18px 16px; display: grid; gap: 8px; text-align: center; }
+.side-card b { font-weight: 600; font-size: .95rem; line-height: 1.4; }
+.side-card p { margin: 0; font-size: .78rem; color: var(--muted); }
+.side-card .btn { background: var(--panel); color: var(--accent); border-color: var(--panel); justify-content: center; }
+
+.wrap { padding-block: 24px 48px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px; align-content: start; min-width: 0; max-width: 1400px; width: 100%; box-sizing: border-box; }
+h1 { font-family: var(--font-display); font-weight: 500; font-size: 1.6rem; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.08rem; margin: 0; }
+.sub { color: var(--muted); margin: 2px 0 0; font-size: .88rem; }
+.head { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; justify-content: space-between; }
+.head-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font: inherit; font-weight: 500; font-size: .92rem; border: 1px solid var(--accent); background: var(--accent); color: var(--on-accent);
+  padding: 8px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+.btn.ghost { background: var(--panel); color: var(--accent); border-color: var(--line); }
+.btn svg { flex: none; }
+.btn:focus-visible, select:focus-visible, .drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.drop { border: 1.5px dashed var(--line); border-radius: var(--r); background: var(--panel); padding: 48px 20px;
+  display: grid; gap: 10px; justify-items: center; text-align: center; cursor: pointer; }
+.drop.over { border-color: var(--accent); background: var(--accent-soft); }
+.drop p { margin: 0; color: var(--muted); max-width: 60ch; }
+.err { color: var(--bad); background: var(--panel); border: 1px solid var(--bad); border-radius: var(--r); padding: 10px 14px; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.filters label { display: block; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+select { font: inherit; font-size: .9rem; color: var(--fg); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 12px; min-width: 10.5rem; max-width: 100%; }
+
+/* การ์ด KPI แบบ SalesPro: ไอคอน + ชื่อ, ตัวเลขใหญ่, เปลี่ยนแปลงเทียบเดือนก่อน + เส้นแนวโน้ม */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); gap: 16px; }
+.kpi { --k: var(--accent); background: var(--panel); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px 20px;
+  display: grid; gap: 10px; min-width: 0; }
+.kpi .lbl { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .9rem; }
+.kpi-icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--k);
+  background: color-mix(in srgb, var(--k) 14%, transparent); flex: none; }
+.kpi .val { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.4rem, 2.1vw, 1.9rem); line-height: 1.15;
+  font-variant-numeric: tabular-nums; overflow-wrap: anywhere; letter-spacing: -.01em; }
+.kpi-foot { display: flex; align-items: end; justify-content: space-between; gap: 8px; min-height: 30px; }
+.delta { font-size: .8rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 0 6px; align-items: baseline; }
+.delta b { font-weight: 600; font-variant-numeric: tabular-nums; }
+.delta .good { color: var(--ok); } .delta .bad { color: var(--bad); }
+.spark { width: 78px; height: 30px; flex: none; overflow: visible; }
+.k-net { --k: var(--k-net); } .k-ok { --k: var(--k-ok); } .k-aov { --k: var(--k-aov); } .k-cancel { --k: var(--k-cancel); } .k-return { --k: var(--k-return); }
+
+.check { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; font-size: .85rem; color: var(--muted); }
+.chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: var(--fg); font-variant-numeric: tabular-nums; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); } .dot.warn { background: var(--warn); }
+.charts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); gap: 16px; }
+.card { background: var(--panel); border-radius: var(--r); box-shadow: var(--shadow); padding: 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card .note { font-size: .8rem; color: var(--muted); margin: -6px 0 0; }
+.chart { position: relative; min-height: 260px; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.tick { fill: var(--muted); font-size: 11px; font-family: var(--font-body); }
+.grid line { stroke: var(--line); stroke-dasharray: 4 4; }
+.tip { position: absolute; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+  padding: 6px 12px; font-size: .82rem; box-shadow: 0 8px 24px rgb(16 24 40 / .14); white-space: nowrap; font-variant-numeric: tabular-nums; font-weight: 500; }
+.tip span { color: var(--muted); display: block; font-size: .72rem; font-weight: 400; }
+.bars { display: grid; grid-template-columns: max-content 1fr; gap: 12px; }
+.bar { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; row-gap: 4px; align-items: center; }
+.bar .name { font-size: .9rem; display: flex; align-items: center; gap: 8px; }
+.bar .name::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--bar); flex: none; }
+.bar .track { height: 10px; background: color-mix(in srgb, var(--bar) 14%, transparent); border-radius: 999px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--bar); border-radius: 999px; }
+.bar.rest .fill { background: color-mix(in srgb, var(--bar) 50%, transparent); }
+.bar .num { grid-column: 2; font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.empty { color: var(--muted); font-size: .9rem; }
+.charts > .wide { grid-column: 1 / -1; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .8rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.seg { font-size: 11px; font-weight: 500; fill: var(--on-color); font-family: var(--font-body); pointer-events: none; font-variant-numeric: tabular-nums; }
+.bar-total { font-size: 12px; font-weight: 600; fill: var(--fg); font-family: var(--font-body); font-variant-numeric: tabular-nums; }
+.bar-name { font-size: 13px; font-weight: 500; fill: var(--fg); font-family: var(--font-body); }
+.section-head { display: grid; gap: 2px; }
+.section-head .note { font-size: .85rem; color: var(--muted); margin: 0; }
+.regions { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 16px; }
+.region-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; justify-content: space-between; }
+.region-head h3 { font-family: var(--font-display); font-weight: 500; font-size: 1rem; margin: 0; display: flex; align-items: center; gap: 8px; }
+.region-head h3::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--bar); }
+.region-total { font-variant-numeric: tabular-nums; font-weight: 600; }
+.crown { margin: -4px 0 2px; font-size: .85rem; color: var(--muted); }
+.crown b { color: var(--bar); font-weight: 600; }
+
+/* แท็บ: ใช้บนจอแคบแทน sidebar */
+.tabs { display: none; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs button { font: inherit; font-weight: 500; color: var(--muted); background: none; border: 0; border-bottom: 2px solid transparent;
+  padding: 8px 14px; margin-bottom: -1px; cursor: pointer; white-space: nowrap; }
+.tabs button.on { color: var(--accent); border-bottom-color: var(--accent); }
+.tabs button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+@media (max-width: 960px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .side { display: none; }
+  .tabs { display: flex; }
+  .wrap { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+}
+
+.products-bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between;
+  background: var(--panel); border: 1px dashed var(--line); border-radius: var(--r); padding: 12px 16px; font-size: .9rem; color: var(--muted); }
+.products-bar.ok { border-style: solid; }
+.products-bar b { color: var(--fg); font-weight: 600; }
+.mega-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 16px; }
+.mega-grid .bar { grid-template-columns: 6rem 1fr; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.split > div { display: grid; gap: 2px; min-width: 0; }
+.split .lbl { display: flex; align-items: center; gap: 8px; font-size: .85rem; color: var(--muted); }
+.split .lbl::before { content: ""; width: 10px; height: 10px; border-radius: 3px; background: var(--bar); }
+.split .big { font-family: var(--font-display); font-weight: 500; font-size: 1.6rem; color: var(--fg); font-variant-numeric: tabular-nums; }
+.split .note { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.stack100 { display: flex; height: 12px; border-radius: 999px; overflow: hidden; gap: 2px; }
+.stack100 i { display: block; height: 100%; }
+.diff { margin: 0; font-size: .85rem; font-weight: 500; }
+.diff.down { color: var(--bad); } .diff.up { color: var(--ok); }
+.table-wrap { overflow-x: auto; }
+.mega-table { width: 100%; border-collapse: collapse; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.mega-table th { text-align: left; font-weight: 500; color: var(--muted); font-size: .8rem; padding: 8px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.mega-table td { padding: 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.mega-table .r { text-align: right; }
+.mega-table b { color: var(--accent); font-weight: 600; }
+.exec { gap: 12px; }
+.exec-head { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: start; justify-content: space-between; }
+.exec-head .note { margin: 2px 0 0; }
+.btn:disabled { opacity: .6; cursor: progress; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.exec-lines { margin: 0; padding-left: 1.4rem; display: grid; gap: 6px; line-height: 1.7; }
+.verify { margin: 0; font-size: .85rem; font-weight: 500; }
+.verify.ok { color: var(--ok); } .verify.warn { color: var(--warn); }
+.err-inline { margin: 0; color: var(--bad); font-size: .9rem; }
+.json-view summary { cursor: pointer; font-size: .85rem; color: var(--muted); }
+.json-view pre { margin: 8px 0 0; padding: 10px 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; font-size: .78rem; overflow-x: auto; max-height: 320px; }
+
+/* กระดาษรายงาน: สีคงที่แบบกระดาษพิมพ์ทั้งสองธีม เพราะต้องแปลงเป็น PDF */
+.paper-wrap { overflow-x: auto; background: var(--bg); border-radius: var(--r); padding: 16px; }
+.paper { position: relative; width: 760px; margin-inline: auto; background: #ffffff; color: #101828; padding: 48px 56px;
+  font-family: var(--font-body); font-size: 14px; text-align: left; line-height: 1.8; }
+.paper header { border-bottom: 2px solid #006eff; padding-bottom: 14px; margin-bottom: 18px; }
+.paper-eyebrow { margin: 0; font-size: 12px; letter-spacing: .06em; color: #006eff; font-weight: 600; }
+.paper h1 { font-family: var(--font-display); font-size: 26px; font-weight: 600; margin: 2px 0 4px; color: #101828; }
+.paper-meta { margin: 0; font-size: 12px; color: #667085; }
+.paper-kpis { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 20px; }
+.paper-kpis div { background: #f5f8ff; border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px; }
+.paper-kpis span { font-size: 11px; color: #667085; }
+.paper-kpis b { font-size: 15px; font-weight: 600; color: #101828; font-variant-numeric: tabular-nums; }
+.paper section { padding-block: 6px; }
+.paper section h2 { font-size: 15px; font-weight: 600; color: #006eff; margin: 0 0 4px; }
+.paper ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.paper li { display: grid; grid-template-columns: 16px 1fr; align-items: start; }
+.paper .dot-b { color: #006eff; font-weight: 600; }
+.paper .recs li { padding-block: 4px; }
+.paper .recs li b { display: block; font-weight: 600; color: #101828; }
+.paper .recs p { margin: 0; display: grid; grid-template-columns: 64px 1fr; }
+.paper .tag { color: #667085; font-size: 12px; padding-top: 2px; }
+.paper footer { margin-top: 18px; padding-top: 10px; border-top: 1px solid #eaecf0; font-size: 11px; color: #667085; }
+.map-card { gap: 16px; }
+.map-head { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: start; justify-content: space-between; }
+.map-head .note { margin: 2px 0 0; }
+.map-body { display: grid; grid-template-columns: minmax(0, 480px) minmax(0, 1fr); gap: 24px; align-items: start; }
+.thmap { position: relative; max-width: 480px; width: 100%; }
+.thmap svg { display: block; width: 100%; height: auto; overflow: visible; }
+.callout { position: absolute; transform: translateY(-50%); background: var(--bg); border-radius: 10px; padding: 6px 10px;
+  display: grid; gap: 0; line-height: 1.3; box-sizing: border-box; pointer-events: none; }
+.callout span { font-size: .72rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.callout b { font-family: var(--font-display); font-weight: 500; font-size: .95rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rank-title { font-family: var(--font-display); font-weight: 500; font-size: .95rem; margin: 0 0 8px; }
+.rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rank li { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 2px 10px; align-items: baseline; }
+.rank .rk { color: var(--muted); font-size: .8rem; font-variant-numeric: tabular-nums; }
+.rank .rn { font-size: .92rem; display: grid; }
+.rank .rn small, .rank .rv small { color: var(--muted); font-size: .72rem; }
+.rank .rv { text-align: right; font-variant-numeric: tabular-nums; font-weight: 500; display: grid; font-size: .92rem; }
+.rank .rbar { grid-column: 2 / -1; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--bar) 14%, transparent); overflow: hidden; }
+.rank .rbar i { display: block; height: 100%; background: var(--bar); border-radius: 999px; }
+@media (max-width: 820px) { .map-body { grid-template-columns: minmax(0, 1fr); } }
+.hidden-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+</style>
+
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="thai-font.js"></script>
+<script src="thai-map.js"></script>
+<script>
+const { useState, useMemo, useRef, useEffect } = React;
+const html = htm.bind(React.createElement);
+
+const OK = 'จัดส่งสำเร็จ';
+const CANCEL = 'ยกเลิก';
+const RETURN = 'คืนสินค้า';
+const ALL = '';
+const REQUIRED = ['order_datetime', 'channel', 'region', 'category', 'qty', 'unit_price', 'discount_pct', 'status'];
+const TH_MONTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+const baht = (v, d = 2) => '฿' + v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+const int = (v) => v.toLocaleString('en-US');
+const monthLabel = (ym, fullYear = false) => {
+  const [y, m] = ym.split('-').map(Number), be = String(y + 543);
+  return TH_MONTH[m - 1] + ' ' + (fullYear ? be : be.slice(2));
+};
+const shortBaht = (v) => '฿' + (v >= 1e6 ? (v / 1e6).toFixed(v % 1e6 === 0 ? 0 : 1) + ' ล.' : v >= 1e3 ? Math.round(v / 1e3) + 'K' : String(v));
+const statusDot = (s) => s === OK ? 'ok' : s === CANCEL ? 'bad' : 'warn';
+
+// ยอดขายสุทธิของแถว = qty × unit_price × (1 − discount_pct/100) ไม่รวม shipping_fee
+function prepare(rows) {
+  return rows.map((r) => {
+    const qty = Number(r.qty), price = Number(r.unit_price), disc = Number(r.discount_pct) || 0;
+    return {
+      region: (r.region || '').trim(),
+      category: (r.category || '').trim(),
+      channel: (r.channel || '').trim(),
+      carrier: (r.carrier || '').trim(),
+      province: (r.province || '').trim(),
+      shipDays: r.ship_days === '' || r.ship_days == null ? null : Number(r.ship_days),
+      status: (r.status || '').trim(),
+      productId: (r.product_id || '').trim(),
+      qty,
+      month: String(r.order_datetime || '').slice(0, 7),
+      date: String(r.order_datetime || '').slice(0, 10),
+      md: String(r.order_datetime || '').slice(5, 10),
+      net: qty * price * (1 - disc / 100),
+    };
+  });
+}
+
+function summarize(rows) {
+  let net = 0, okCount = 0, cancel = 0, returned = 0;
+  const status = new Map(), byMonth = new Map(), byChannel = new Map(), byCarrier = new Map(), byRegion = new Map();
+  for (const r of rows) {
+    status.set(r.status, (status.get(r.status) || 0) + 1);
+    if (r.status === CANCEL) cancel++;
+    if (r.status === RETURN) returned++;
+    if (r.status !== OK) continue;
+    okCount++;
+    net += r.net;
+    byMonth.set(r.month, (byMonth.get(r.month) || 0) + r.net);
+    byChannel.set(r.channel, (byChannel.get(r.channel) || 0) + r.net);
+    const c = byCarrier.get(r.carrier) || { net: 0, n: 0, days: 0, dn: 0, cats: new Map() };
+    c.net += r.net; c.n++;
+    c.cats.set(r.category, (c.cats.get(r.category) || 0) + r.net);
+    if (r.shipDays != null && !Number.isNaN(r.shipDays)) { c.days += r.shipDays; c.dn++; }
+    byCarrier.set(r.carrier, c);
+    if (!byRegion.has(r.region)) byRegion.set(r.region, new Map());
+    const provs = byRegion.get(r.region), p = provs.get(r.province) || { net: 0, n: 0 };
+    p.net += r.net; p.n++;
+    provs.set(r.province, p);
+  }
+  return {
+    net, okCount,
+    aov: okCount ? net / okCount : 0,
+    cancelRate: rows.length ? cancel / rows.length * 100 : 0,
+    returnRate: rows.length ? returned / rows.length * 100 : 0,
+    status: [...status].sort((a, b) => b[1] - a[1]),
+    months: [...byMonth].sort((a, b) => a[0].localeCompare(b[0])),
+    channels: [...byChannel].sort((a, b) => b[1] - a[1]),
+    carriers: [...byCarrier].map(([name, c]) => ({ name, net: c.net, n: c.n, days: c.dn ? c.days / c.dn : null, cats: c.cats }))
+      .sort((a, b) => b.net - a.net),
+    regions: [...byRegion].map(([region, provs]) => {
+      const list = [...provs].map(([name, p]) => ({ name, ...p })).sort((a, b) => b.net - a.net);
+      return { region, net: list.reduce((t, p) => t + p.net, 0), provinces: list };
+    }).sort((a, b) => b.net - a.net),
+  };
+}
+
+// วันเมกะเซล = วันที่เลขวันเท่ากับเลขเดือน (MM-DD)
+const MEGA = [['10-10', '10.10'], ['11-11', '11.11'], ['12-12', '12.12'], ['03-03', '3.3'], ['06-06', '6.6'], ['09-09', '9.9']];
+const MEGA_LABEL = new Map(MEGA);
+
+// กำไรขั้นต้น = ยอดขายสุทธิ − qty × unit_cost (unit_cost จาก products.csv) เฉพาะจัดส่งสำเร็จ
+function megaSummary(rows, cost) {
+  const blank = () => ({ net: 0, gp: 0, costedNet: 0, n: 0, dates: new Set() });
+  const mega = blank(), normal = blank(), days = new Map();
+  let total = 0, missing = 0;
+  for (const r of rows) {
+    if (r.status !== OK) continue;
+    total += r.net;
+    const label = MEGA_LABEL.get(r.md);
+    const groups = label ? [mega, days.get(r.date) || (days.set(r.date, { label, date: r.date, ...blank() }), days.get(r.date))] : [normal];
+    const c = cost ? cost.get(r.productId) : undefined;
+    if (cost && c === undefined) missing++;
+    for (const g of groups) {
+      g.net += r.net; g.n++; g.dates.add(r.date);
+      if (c !== undefined) { g.gp += r.net - r.qty * c; g.costedNet += r.net; }
+    }
+  }
+  const finish = (g) => ({
+    ...g, days: g.dates.size,
+    share: total ? g.net / total * 100 : 0,
+    perDay: g.dates.size ? g.net / g.dates.size : 0,
+    gpPct: g.costedNet ? g.gp / g.costedNet * 100 : null,
+  });
+  return {
+    total, missing,
+    mega: finish(mega), normal: finish(normal),
+    days: [...days.values()].sort((a, b) => a.date.localeCompare(b.date)).map(finish),
+  };
+}
+
+function useWidth() {
+  const ref = useRef(null);
+  const [w, setW] = useState(600);
+  useEffect(() => {
+    if (!ref.current) return;
+    const ro = new ResizeObserver(([e]) => setW(Math.max(260, Math.round(e.contentRect.width))));
+    ro.observe(ref.current);
+    return () => ro.disconnect();
+  }, []);
+  return [ref, w];
+}
+
+function niceTicks(max, count = 4) {
+  if (max <= 0) return [0];
+  const raw = max / count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => s >= raw);
+  const ticks = [];
+  for (let v = 0; v <= max + step * 0.001; v += step) ticks.push(v);
+  if (ticks[ticks.length - 1] < max) ticks.push(ticks[ticks.length - 1] + step);
+  return ticks;
+}
+
+function LineChart({ data }) {
+  const [ref, width] = useWidth();
+  const [hover, setHover] = useState(null);
+  if (!data.length) return html`<p class="empty">ไม่มีคำสั่งซื้อที่จัดส่งสำเร็จในตัวกรองนี้</p>`;
+  const ticks = niceTicks(Math.max(...data.map((d) => d[1])));
+  // ป้ายแกน Y เป็นเงินเต็มมีคอมมา กว้างตามป้ายที่ยาวที่สุด
+  const longest = Math.max(...ticks.map((t) => baht(t, 0).length));
+  const H = 260, m = { t: 12, r: 16, b: 28, l: Math.round(14 + longest * 6.8) };
+  const yMax = ticks[ticks.length - 1];
+  const iw = width - m.l - m.r, ih = H - m.t - m.b;
+  const x = (i) => m.l + (data.length === 1 ? iw / 2 : i * iw / (data.length - 1));
+  const y = (v) => m.t + ih - v / yMax * ih;
+  const every = width < 520 ? 3 : width < 760 ? 2 : 1;
+  const path = data.map((d, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ',' + y(d[1]).toFixed(1)).join('');
+  const area = path + `L${x(data.length - 1)},${y(0)}L${x(0)},${y(0)}Z`;
+  const onMove = (e) => {
+    const box = e.currentTarget.getBoundingClientRect();
+    const px = (e.clientX - box.left) * width / box.width;
+    const i = Math.round((px - m.l) / (iw / Math.max(1, data.length - 1)));
+    setHover(Math.max(0, Math.min(data.length - 1, i)));
+  };
+  const h = hover != null ? data[hover] : null;
+  return html`
+    <div class="chart" ref=${ref}>
+      <svg viewBox=${`0 0 ${width} ${H}`} role="img" aria-label="ยอดขายสุทธิรายเดือน" onMouseMove=${onMove} onMouseLeave=${() => setHover(null)}>
+        <defs>
+          <linearGradient id="fade" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0" style=${{ stopColor: 'var(--accent)', stopOpacity: 0.22 }} />
+            <stop offset="1" style=${{ stopColor: 'var(--accent)', stopOpacity: 0 }} />
+          </linearGradient>
+        </defs>
+        <g class="grid">
+          ${ticks.map((t) => html`<g key=${t}>
+            <line x1=${m.l} x2=${width - m.r} y1=${y(t)} y2=${y(t)} />
+            <text class="tick" x=${m.l - 8} y=${y(t) + 4} text-anchor="end">${baht(t, 0)}</text>
+          </g>`)}
+        </g>
+        <path d=${area} fill="url(#fade)" />
+        <path d=${path} fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+        ${data.map((d, i) => (data.length - 1 - i) % every === 0 ? html`
+          <text key=${d[0]} class="tick" x=${x(i)} y=${H - 8} text-anchor="middle">${monthLabel(d[0])}</text>` : null)}
+        ${h && html`<g>
+          <line x1=${x(hover)} x2=${x(hover)} y1=${m.t} y2=${m.t + ih} stroke="var(--line)" />
+          <circle cx=${x(hover)} cy=${y(h[1])} r="4.5" fill="var(--accent)" stroke="var(--panel)" stroke-width="2" />
+        </g>`}
+      </svg>
+      ${h && html`<div class="tip" style=${{
+        left: Math.min(Math.max(0, x(hover) / width * 100 - 12), 70) + '%', top: 0 }}>
+        <span>${monthLabel(h[0], true)}</span>${baht(h[1])}
+      </div>`}
+    </div>`;
+}
+
+// สีประจำช่องทาง คงที่ไม่ว่าจะกรองอะไร
+const CHANNEL_COLOR = { 'แอป': 'var(--c1)', 'เว็บไซต์': 'var(--c2)', 'Marketplace': 'var(--c3)', 'LINE OA': 'var(--c4)' };
+const channelColor = (name) => CHANNEL_COLOR[name] || 'var(--c5)';
+const CARRIER_COLOR = { 'ไปไว Express': 'var(--c6)', 'พัสดุดี': 'var(--c7)', 'ทันใจขนส่ง': 'var(--c8)' };
+const carrierColor = (name) => CARRIER_COLOR[name] || 'var(--c5)';
+const REGION_COLOR = {
+  'กรุงเทพฯและปริมณฑล': 'var(--c1)', 'ภาคกลาง': 'var(--c2)', 'ภาคตะวันออก': 'var(--c6)',
+  'ภาคตะวันออกเฉียงเหนือ': 'var(--c3)', 'ภาคเหนือ': 'var(--c4)', 'ภาคใต้': 'var(--c5)',
+};
+const regionColor = (name) => REGION_COLOR[name] || 'var(--c7)';
+
+// สีหมวดสินค้า ผูกกับลำดับหมวดทั้งไฟล์ สีจึงไม่เปลี่ยนเมื่อกรอง
+const CAT_COLORS = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)', 'var(--c6)', 'var(--c7)', 'var(--c8)'];
+const catColor = (cats, name) => CAT_COLORS[Math.max(0, cats.indexOf(name)) % CAT_COLORS.length];
+
+// กราฟแท่งแนวตั้งแบบซ้อน: แท่งละบริษัทขนส่ง แต่ละช่วงคือหมวดสินค้า ป้ายเป็น % ของยอดบริษัทนั้น
+function CarrierStack({ data, cats }) {
+  const [ref, width] = useWidth();
+  const [hover, setHover] = useState(null);
+  if (!data.length) return html`<p class="empty">ไม่มีคำสั่งซื้อที่จัดส่งสำเร็จในตัวกรองนี้</p>`;
+  const ticks = niceTicks(Math.max(...data.map((d) => d.net)));
+  const yMax = ticks[ticks.length - 1];
+  const longest = Math.max(...ticks.map((t) => baht(t, 0).length));
+  const H = 360, m = { t: 26, r: 12, b: 48, l: Math.round(14 + longest * 6.8) };
+  const iw = width - m.l - m.r, ih = H - m.t - m.b;
+  const band = iw / data.length, bw = Math.min(150, band * 0.62);
+  const y = (v) => m.t + ih - v / yMax * ih;
+  const present = cats.filter((c) => data.some((d) => d.cats.get(c)));
+  return html`
+    <div class="legend">
+      ${present.map((c) => html`<span key=${c}><i style=${{ background: catColor(cats, c) }}></i>${c}</span>`)}
+    </div>
+    <div class="chart" ref=${ref} style=${{ minHeight: H + 'px' }}>
+      <svg viewBox=${`0 0 ${width} ${H}`} role="img" aria-label="ยอดขายสุทธิตามบริษัทขนส่ง แยกหมวดสินค้า">
+        <g class="grid">
+          ${ticks.map((t) => html`<g key=${t}>
+            <line x1=${m.l} x2=${width - m.r} y1=${y(t)} y2=${y(t)} />
+            <text class="tick" x=${m.l - 8} y=${y(t) + 4} text-anchor="end">${baht(t, 0)}</text>
+          </g>`)}
+        </g>
+        ${data.map((d, i) => {
+          const x = m.l + band * i + (band - bw) / 2;
+          let acc = 0;
+          const segs = present.map((c) => {
+            const v = d.cats.get(c) || 0;
+            if (!v) return null;
+            const y1 = y(acc + v), h = y(acc) - y1, pct = v / d.net * 100;
+            acc += v;
+            const on = hover && hover.carrier === d.name && hover.cat === c;
+            return html`<g key=${c}
+                onMouseEnter=${() => setHover({ carrier: d.name, cat: c, v, pct, x: x + bw / 2, y: y1 })}
+                onMouseLeave=${() => setHover(null)}>
+              <rect x=${x} y=${y1} width=${bw} height=${h} fill=${catColor(cats, c)}
+                stroke="var(--panel)" stroke-width="1" opacity=${hover && !on ? 0.55 : 1} />
+              ${h >= 13 && bw >= 44 && html`<text class="seg" x=${x + bw / 2} y=${y1 + h / 2 + 4} text-anchor="middle">${pct.toFixed(1)}%</text>`}
+            </g>`;
+          });
+          // ตัดขอบแท่งทั้งแท่งให้มุมบนโค้ง มุมล่างตรง
+          const top = y(d.net), base = y(0), r = Math.min(8, (base - top) / 2, bw / 2);
+          const clip = `M${x},${base}V${top + r}Q${x},${top} ${x + r},${top}H${x + bw - r}Q${x + bw},${top} ${x + bw},${top + r}V${base}Z`;
+          return html`<g key=${d.name}>
+            <clipPath id=${'carrier-clip-' + i}><path d=${clip} /></clipPath>
+            <g clip-path=${`url(#carrier-clip-${i})`}>${segs}</g>
+            <text class="bar-total" x=${x + bw / 2} y=${y(d.net) - 8} text-anchor="middle">${baht(d.net, 0)}</text>
+            <text class="bar-name" x=${x + bw / 2} y=${H - m.b + 20} text-anchor="middle">${d.name}</text>
+            <text class="tick" x=${x + bw / 2} y=${H - m.b + 36} text-anchor="middle">${int(d.n)} คำสั่งซื้อ${d.days != null ? ` · ส่งเฉลี่ย ${d.days.toFixed(1)} วัน` : ''}</text>
+          </g>`;
+        })}
+      </svg>
+      ${hover && html`<div class="tip" style=${{
+        left: Math.min(Math.max(0, hover.x / width * 100 - 12), 64) + '%', top: (hover.y / H * 100) + '%',
+        transform: 'translateY(-110%)' }}>
+        <span>${hover.carrier} · ${hover.cat}</span>${baht(hover.v, 0)} · ${hover.pct.toFixed(1)}%
+      </div>`}
+    </div>`;
+}
+
+// แผนที่จุด (dot matrix) ประเทศไทย: คำนวณตารางจุดจากรูปร่างจังหวัดใน thai-map.js แล้วระบายสีตามภูมิภาค
+let MAP_CACHE;
+function thaiMapGeometry() {
+  if (MAP_CACHE !== undefined) return MAP_CACHE;
+  const P = window.TH_PROVINCES || [];
+  if (!P.length) return (MAP_CACHE = null);
+  let minLon = 1e9, maxLon = -1e9, minLat = 1e9, maxLat = -1e9;
+  const prov = P.map((p) => {
+    let a = 1e9, b = -1e9, c = 1e9, d = -1e9;
+    for (const ring of p.r) for (const [x, y] of ring) { if (x < a) a = x; if (x > b) b = x; if (y < c) c = y; if (y > d) d = y; }
+    minLon = Math.min(minLon, a); maxLon = Math.max(maxLon, b); minLat = Math.min(minLat, c); maxLat = Math.max(maxLat, d);
+    return { name: p.n, rings: p.r, bbox: [a, b, c, d], dots: [], cx: (a + b) / 2, cy: (c + d) / 2 };
+  });
+  // กฎคู่-คี่ ครอบคลุมรูกลางพื้นที่ (เช่น จังหวัดที่ล้อมจังหวัดอื่น)
+  const inside = (x, y, rings) => {
+    let c = false;
+    for (const ring of rings) {
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const [xi, yi] = ring[i], [xj, yj] = ring[j];
+        if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c;
+      }
+    }
+    return c;
+  };
+  const step = 0.12;
+  for (let lat = Math.ceil(minLat / step) * step; lat <= maxLat; lat += step) {
+    for (let lon = Math.ceil(minLon / step) * step; lon <= maxLon; lon += step) {
+      for (const p of prov) {
+        const [a, b, c, d] = p.bbox;
+        if (lon < a || lon > b || lat < c || lat > d) continue;
+        if (inside(lon, lat, p.rings)) { p.dots.push([lon, lat]); break; }
+      }
+    }
+  }
+  for (const p of prov) {
+    if (p.dots.length) {
+      p.cx = p.dots.reduce((t, q) => t + q[0], 0) / p.dots.length;
+      p.cy = p.dots.reduce((t, q) => t + q[1], 0) / p.dots.length;
+    }
+  }
+  return (MAP_CACHE = { prov, minLon, maxLon, minLat, maxLat, step });
+}
+
+function ThaiMap({ provinces }) {
+  const geo = useMemo(thaiMapGeometry, []);
+  const [hover, setHover] = useState(null);
+  if (!geo) return null;
+
+  const H = 600, pad = 10, CALL = 150;
+  const cos = Math.cos(13 * Math.PI / 180);
+  const sc = (H - 2 * pad) / (geo.maxLat - geo.minLat);
+  const X = (lon) => (lon - geo.minLon) * cos * sc + pad;
+  const Y = (lat) => (geo.maxLat - lat) * sc + pad;
+  const mapW = (geo.maxLon - geo.minLon) * cos * sc + 2 * pad;
+  const VW = Math.round(mapW + CALL);
+  const dotW = geo.step * cos * sc * 0.7;
+
+  const byName = new Map(provinces.map((p) => [p.name, p]));
+  const max = Math.max(1, ...provinces.map((p) => p.net));
+  const total = provinces.reduce((t, p) => t + p.net, 0) || 1;
+  const placed = geo.prov.filter((p) => byName.has(p.name)).map((p) => {
+    const d = byName.get(p.name);
+    return { ...d, x: X(p.cx), y: Y(p.cy), r: 5 + 12 * Math.sqrt(d.net / max), color: regionColor(d.region) };
+  }).sort((a, b) => b.net - a.net);
+
+  // ป้ายบอกยอด 3 จังหวัดแรกที่อยู่ห่างกันพอ ไม่ให้ซ้อนกัน
+  const chosen = [];
+  for (const p of placed) {
+    if (chosen.length >= 3) break;
+    if (chosen.every((c) => Math.hypot(c.x - p.x, c.y - p.y) > 80)) chosen.push(p);
+  }
+  const callouts = chosen.map((p) => ({ ...p, cy2: p.y })).sort((a, b) => a.cy2 - b.cy2);
+  for (let i = 1; i < callouts.length; i++) if (callouts[i].cy2 - callouts[i - 1].cy2 < 58) callouts[i].cy2 = callouts[i - 1].cy2 + 58;
+  const callX = mapW + 6;
+
+  const show = (p) => setHover({ name: p.name, net: p.net, n: p.n, share: p.net / total * 100, x: p.x, y: p.y });
+  return html`<div class="thmap">
+    <svg viewBox=${`0 0 ${VW} ${H}`} role="img" aria-label="แผนที่ประเทศไทย ยอดขายสุทธิตามจังหวัด">
+      ${geo.prov.map((p) => {
+        const d = byName.get(p.name);
+        if (!p.dots.length) return null;
+        const path = p.dots.map(([lo, la]) => `M${X(lo).toFixed(1)},${Y(la).toFixed(1)}h0`).join('');
+        return html`<path key=${p.name} d=${path} fill="none" stroke-linecap="round" stroke-width=${dotW}
+          style=${d ? { stroke: regionColor(d.region), strokeOpacity: 0.42 } : { stroke: 'color-mix(in srgb, var(--muted) 30%, transparent)' }}
+          onMouseEnter=${d ? () => show({ ...d, x: X(p.cx), y: Y(p.cy) }) : undefined} onMouseLeave=${d ? () => setHover(null) : undefined} />`;
+      })}
+      ${callouts.map((c) => html`<line key=${'l' + c.name} x1=${c.x + c.r} y1=${c.y} x2=${callX - 2} y2=${c.cy2} stroke="var(--line)" stroke-width="1.5" />`)}
+      ${[...placed].reverse().map((p) => html`<g key=${p.name} onMouseEnter=${() => show(p)} onMouseLeave=${() => setHover(null)} style=${{ cursor: 'default' }}>
+        <circle cx=${p.x} cy=${p.y} r=${p.r + 4} fill=${p.color} fill-opacity="0.2" />
+        <circle cx=${p.x} cy=${p.y} r=${p.r} fill=${p.color} fill-opacity="0.9" stroke="var(--panel)" stroke-width="2" />
+      </g>`)}
+    </svg>
+    ${callouts.map((c) => html`<div class="callout" key=${c.name} style=${{ left: (callX / VW * 100) + '%', top: (c.cy2 / H * 100) + '%', width: ((CALL - 10) / VW * 100) + '%' }}>
+      <span>${c.name}</span><b>${baht(c.net, 0)}</b>
+    </div>`)}
+    ${hover && html`<div class="tip" style=${{ left: Math.min(hover.x / VW * 100, 55) + '%', top: (hover.y / H * 100) + '%', transform: 'translate(12px, -120%)' }}>
+      <span>${hover.name}</span>${baht(hover.net, 0)} · ${hover.share.toFixed(1)}% · ${int(hover.n)} คำสั่งซื้อ
+    </div>`}
+  </div>`;
+}
+
+function ProvinceMapCard({ regions }) {
+  const flat = regions.flatMap((r) => r.provinces.map((p) => ({ name: p.name, net: p.net, n: p.n, region: r.region })));
+  const ranked = [...flat].sort((a, b) => b.net - a.net);
+  const top = ranked.slice(0, 10), max = top.length ? top[0].net : 1;
+  const total = flat.reduce((t, p) => t + p.net, 0) || 1;
+  if (!flat.length) return null;
+  return html`<div class="card map-card">
+    <div class="map-head">
+      <div>
+        <h2>แผนที่ยอดขายสุทธิตามจังหวัด</h2>
+        <p class="note">ขนาดวงกลมตามยอดขายสุทธิ สีตามภูมิภาค ชี้ที่วงกลมเพื่อดูรายละเอียด</p>
+      </div>
+      <div class="legend">
+        ${regions.map((r) => html`<span key=${r.region}><i style=${{ background: regionColor(r.region) }}></i>${r.region}</span>`)}
+      </div>
+    </div>
+    <div class="map-body">
+      <${ThaiMap} provinces=${flat} />
+      <div>
+        <h3 class="rank-title">จังหวัดที่มียอดสูงสุด ${int(top.length)} อันดับ</h3>
+        <ol class="rank">
+          ${top.map((p, i) => html`<li key=${p.name} style=${{ '--bar': regionColor(p.region) }}>
+            <span class="rk">${i + 1}</span>
+            <span class="rn">${p.name}<small>${p.region}</small></span>
+            <span class="rv">${baht(p.net, 0)}<small>${(p.net / total * 100).toFixed(1)}%</small></span>
+            <span class="rbar"><i style=${{ width: (p.net / max * 100) + '%' }}></i></span>
+          </li>`)}
+        </ol>
+      </div>
+    </div>
+  </div>`;
+}
+
+function RegionCard({ r }) {
+  const top = r.provinces[0], max = top.net;
+  return html`<div class="card region" style=${{ '--bar': regionColor(r.region) }}>
+    <div class="region-head">
+      <h3>${r.region}</h3>
+      <span class="region-total">${baht(r.net, 0)}</span>
+    </div>
+    <p class="crown">อันดับ 1 <b>${top.name}</b></p>
+    <div class="bars" role="list">
+      ${r.provinces.map((p, i) => html`<div class=${'bar' + (i ? ' rest' : '')} role="listitem" key=${p.name}>
+        <span class="name">${p.name}</span>
+        <div class="track"><div class="fill" style=${{ width: (p.net / max * 100) + '%' }}></div></div>
+        <span class="num">${baht(p.net, 0)} · ${int(p.n)} คำสั่งซื้อ</span>
+      </div>`)}
+    </div>
+  </div>`;
+}
+
+function ChannelBars({ data, total }) {
+  if (!data.length) return html`<p class="empty">ไม่มีคำสั่งซื้อที่จัดส่งสำเร็จในตัวกรองนี้</p>`;
+  const max = data[0][1];
+  return html`<div class="bars" role="list">
+    ${data.map(([name, v]) => html`<div class="bar" role="listitem" key=${name} style=${{ '--bar': channelColor(name) }}>
+      <span class="name">${name}</span>
+      <div class="track"><div class="fill" style=${{ width: (v / max * 100) + '%' }}></div></div>
+      <span class="num">${baht(v, 0)} · ${(v / total * 100).toFixed(1)}%</span>
+    </div>`)}
+  </div>`;
+}
+
+function MegaTab({ m, hasCost, productsName, onPickProducts }) {
+  const pct = (v) => v == null ? '—' : v.toFixed(2) + '%';
+  const gpMax = Math.max(m.mega.gpPct || 0, m.normal.gpPct || 0, 1);
+  return html`<${React.Fragment}>
+    <div class=${'products-bar' + (hasCost ? ' ok' : '')}>
+      <span>${hasCost
+        ? html`ใช้ต้นทุนจาก <b>${productsName}</b>${m.missing ? ` · ${int(m.missing)} แถวไม่พบ product_id ใน products.csv จึงไม่นับในกำไรขั้นต้น` : ''}`
+        : 'อัปโหลด products.csv เพื่อคำนวณ % กำไรขั้นต้น (ใช้ unit_cost)'}</span>
+      <button class=${'btn' + (hasCost ? ' ghost' : '')} onClick=${onPickProducts}>${hasCost ? 'เปลี่ยน products.csv' : 'อัปโหลด products.csv'}</button>
+    </div>
+
+    <section class="mega-grid">
+      <div class="card">
+        <h2>สัดส่วนยอดขายสุทธิ</h2>
+        <p class="note">วันเมกะเซล ${int(m.mega.days)} วัน เทียบกับวันปกติ ${int(m.normal.days)} วัน</p>
+        <div class="split">
+          <div style=${{ '--bar': 'var(--c7)' }}><span class="lbl">วันเมกะเซล</span><span class="big">${pct(m.mega.share)}</span><span class="note">${baht(m.mega.net, 0)}</span></div>
+          <div style=${{ '--bar': 'var(--c1)' }}><span class="lbl">วันปกติ</span><span class="big">${pct(m.normal.share)}</span><span class="note">${baht(m.normal.net, 0)}</span></div>
+        </div>
+        <div class="stack100" role="img" aria-label=${`วันเมกะเซล ${pct(m.mega.share)} วันปกติ ${pct(m.normal.share)}`}>
+          <i style=${{ width: m.mega.share + '%', background: 'var(--c7)' }}></i>
+          <i style=${{ width: m.normal.share + '%', background: 'var(--c1)' }}></i>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>ยอดขายสุทธิเฉลี่ยต่อวัน</h2>
+        <p class="note">ยอดขายสุทธิ ÷ จำนวนวันที่มียอดขาย</p>
+        <div class="split">
+          <div style=${{ '--bar': 'var(--c7)' }}><span class="lbl">วันเมกะเซล</span><span class="big">${baht(m.mega.perDay, 0)}</span><span class="note">${int(m.mega.days)} วัน</span></div>
+          <div style=${{ '--bar': 'var(--c1)' }}><span class="lbl">วันปกติ</span><span class="big">${baht(m.normal.perDay, 0)}</span><span class="note">${int(m.normal.days)} วัน</span></div>
+        </div>
+        <div class="bars">
+          ${[['วันเมกะเซล', m.mega.perDay, 'var(--c7)'], ['วันปกติ', m.normal.perDay, 'var(--c1)']].map(([name, v, color]) => html`
+            <div class="bar" key=${name} style=${{ '--bar': color }}>
+              <span class="name">${name}</span>
+              <div class="track"><div class="fill" style=${{ width: (v / Math.max(m.mega.perDay, m.normal.perDay, 1) * 100) + '%' }}></div></div>
+            </div>`)}
+        </div>
+        ${m.normal.perDay > 0 && m.mega.perDay > 0 && html`<p class=${'diff ' + (m.mega.perDay >= m.normal.perDay ? 'up' : 'down')}>
+          วันเมกะเซลขายได้เฉลี่ยต่อวัน${m.mega.perDay >= m.normal.perDay ? 'มากกว่า' : 'น้อยกว่า'}วันปกติ ${(m.mega.perDay / m.normal.perDay).toFixed(1)} เท่า
+        </p>`}
+      </div>
+
+      <div class="card">
+        <h2>% กำไรขั้นต้น</h2>
+        <p class="note">กำไรขั้นต้น ÷ ยอดขายสุทธิ · กำไรขั้นต้น = ยอดขายสุทธิ − qty × unit_cost</p>
+        ${hasCost ? html`
+          <div class="bars">
+            <div class="bar" style=${{ '--bar': 'var(--c7)' }}>
+              <span class="name">วันเมกะเซล</span>
+              <div class="track"><div class="fill" style=${{ width: (m.mega.gpPct / gpMax * 100) + '%' }}></div></div>
+              <span class="num">${pct(m.mega.gpPct)} · กำไร ${baht(m.mega.gp, 0)}</span>
+            </div>
+            <div class="bar" style=${{ '--bar': 'var(--c1)' }}>
+              <span class="name">วันปกติ</span>
+              <div class="track"><div class="fill" style=${{ width: (m.normal.gpPct / gpMax * 100) + '%' }}></div></div>
+              <span class="num">${pct(m.normal.gpPct)} · กำไร ${baht(m.normal.gp, 0)}</span>
+            </div>
+          </div>
+          <p class=${'diff ' + (m.mega.gpPct < m.normal.gpPct ? 'down' : 'up')}>
+            วันเมกะเซล${m.mega.gpPct < m.normal.gpPct ? 'ต่ำกว่า' : 'สูงกว่า'}วันปกติ ${Math.abs(m.mega.gpPct - m.normal.gpPct).toFixed(2)} จุด
+          </p>`
+        : html`<p class="empty">ต้องอัปโหลด products.csv ก่อน จึงจะเห็น % กำไรขั้นต้น</p>`}
+      </div>
+    </section>
+
+    <div class="card">
+      <h2>แต่ละวันเมกะเซล</h2>
+      <p class="note">สัดส่วนเทียบกับยอดขายสุทธิทั้งหมดในตัวกรองนี้</p>
+      ${m.days.length ? html`<div class="table-wrap"><table class="mega-table">
+        <thead><tr><th>วัน</th><th>วันที่</th><th class="r">ยอดขายสุทธิ</th><th class="r">สัดส่วน</th><th class="r">% กำไรขั้นต้น</th><th class="r">คำสั่งซื้อ</th></tr></thead>
+        <tbody>${m.days.map((d) => html`<tr key=${d.date}>
+          <td><b>${d.label}</b></td>
+          <td>${(() => { const [y, mo, da] = d.date.split('-').map(Number); return da + ' ' + TH_MONTH[mo - 1] + ' ' + (y + 543); })()}</td>
+          <td class="r">${baht(d.net, 0)}</td>
+          <td class="r">${pct(d.share)}</td>
+          <td class="r">${hasCost ? pct(d.gpPct) : '—'}</td>
+          <td class="r">${int(d.n)}</td>
+        </tr>`)}</tbody>
+      </table></div>` : html`<p class="empty">ไม่มียอดขายในวันเมกะเซลตามตัวกรองนี้</p>`}
+    </div>
+  <//>`;
+}
+
+// JSON ตัวเลขสรุป ไม่เกิน 30 ค่า ไม่มีข้อมูลดิบรายแถว
+function buildSummaryJson(s, m, hasCost, region, category, month) {
+  const r0 = (v) => Math.round(v), r2 = (v) => Math.round(v * 100) / 100;
+  const out = {
+    'ตัวกรอง_ภูมิภาค': region || 'ทุกภูมิภาค',
+    'ตัวกรอง_หมวดสินค้า': category || 'ทุกหมวด',
+    'ตัวกรอง_เดือน': month ? monthLabel(month, true) : 'ทุกเดือน',
+  };
+  if (s.months.length) {
+    const sorted = [...s.months].sort((a, b) => b[1] - a[1]);
+    Object.assign(out, {
+      'ช่วงข้อมูล_เริ่ม': monthLabel(s.months[0][0], true),
+      'ช่วงข้อมูล_สิ้นสุด': monthLabel(s.months[s.months.length - 1][0], true),
+    });
+    Object.assign(out, {
+      'ยอดขายสุทธิ_บาท': r0(s.net),
+      'คำสั่งซื้อสำเร็จ': s.okCount,
+      'AOV_บาท': r2(s.aov),
+      'อัตรายกเลิก_pct': r2(s.cancelRate),
+      'อัตราคืนสินค้า_pct': r2(s.returnRate),
+      'เดือนยอดสูงสุด': monthLabel(sorted[0][0], true),
+      'ยอดเดือนสูงสุด_บาท': r0(sorted[0][1]),
+      'เดือนยอดต่ำสุด': monthLabel(sorted[sorted.length - 1][0], true),
+      'ยอดเดือนต่ำสุด_บาท': r0(sorted[sorted.length - 1][1]),
+    });
+    for (const [name, v] of s.channels.slice(0, 4)) out[`สัดส่วนช่องทาง_${name}_pct`] = r2(v / s.net * 100);
+    if (s.carriers.length) {
+      out['ขนส่งยอดสูงสุด'] = s.carriers[0].name;
+      out['สัดส่วนขนส่งยอดสูงสุด_pct'] = r2(s.carriers[0].net / s.net * 100);
+    }
+    if (s.regions.length) {
+      out['ภูมิภาคยอดสูงสุด'] = s.regions[0].region;
+      out['สัดส่วนภูมิภาคยอดสูงสุด_pct'] = r2(s.regions[0].net / s.net * 100);
+      out['จังหวัดยอดสูงสุดในภูมิภาคนั้น'] = s.regions[0].provinces[0].name;
+    }
+    out['สัดส่วนยอดวันเมกะเซล_pct'] = r2(m.mega.share);
+    out['ยอดเฉลี่ยต่อวัน_วันเมกะเซล_บาท'] = r0(m.mega.perDay);
+    out['ยอดเฉลี่ยต่อวัน_วันปกติ_บาท'] = r0(m.normal.perDay);
+    if (hasCost && m.mega.gpPct != null && m.normal.gpPct != null) {
+      const costed = m.mega.costedNet + m.normal.costedNet;
+      out['กำไรขั้นต้นรวม_pct'] = r2((m.mega.gp + m.normal.gp) / costed * 100);
+      out['กำไรขั้นต้นวันเมกะเซล_pct'] = r2(m.mega.gpPct);
+      out['กำไรขั้นต้นวันปกติ_pct'] = r2(m.normal.gpPct);
+    }
+  }
+  return Object.fromEntries(Object.entries(out).slice(0, 30));
+}
+
+const numbersIn = (text) => (String(text).replace(/(\d),(?=\d{3})/g, '$1').match(/\d+(?:\.\d+)?/g) || []).map(Number);
+
+// ตรวจว่าทุกตัวเลขในบทสรุปมีอยู่ในค่าของ JSON
+function checkNumbers(text, json) {
+  const allowed = new Set(Object.values(json).flatMap(numbersIn));
+  return [...new Set(numbersIn(text))].filter((n) => !allowed.has(n));
+}
+
+const SAMPLE_ERRORS = {
+  not_granted: 'ไม่ได้อนุญาตให้หน้านี้ใช้ Claude จึงสรุปไม่ได้',
+  sampling_disabled: 'บัญชีนี้ใช้ Claude จากหน้าเว็บไม่ได้',
+  rate_limited: 'เรียกใช้บ่อยเกินไปหรือโควตาเต็ม ลองใหม่ภายหลัง',
+  session_expired: 'กรุณาเข้าสู่ระบบ Claude ใหม่ แล้วลองอีกครั้ง',
+};
+
+function ExecSummary({ sample, json }) {
+  const [state, setState] = useState({ status: 'idle', text: '', bad: [] });
+  const run = async () => {
+    const prompt = [
+      'คุณเป็นนักวิเคราะห์ที่เขียนสรุปให้ผู้บริหารร้านออนไลน์ "บ้านสบาย ช็อป"',
+      'เขียนบทสรุปภาษาไทย 5 บรรทัดพอดี บรรทัดละ 1 ประโยค ไม่มีหัวข้อ ไม่มีเลขลำดับหรือสัญลักษณ์นำหน้าบรรทัด',
+      'ใช้เฉพาะตัวเลขที่ปรากฏในค่าของ JSON ด้านล่าง เขียนให้ตรงกับใน JSON (คั่นหลักพันด้วยคอมมาได้)',
+      'ห้ามคำนวณตัวเลขใหม่ ห้ามปัดเศษ ห้ามแปลงหน่วย ห้ามใช้ตัวเลขอื่นใดเลย รวมถึงปี จำนวนวัน หรือจำนวนนับ',
+      'ชื่อเดือนให้เขียนตามที่อยู่ใน JSON คีย์ที่ลงท้าย _pct คือเปอร์เซ็นต์ คีย์ที่ลงท้าย _บาท คือบาท',
+      'บรรทัดสุดท้ายเป็นข้อเสนอแนะ 1 ข้อที่อิงจากตัวเลขเหล่านี้',
+      '',
+      'JSON:',
+      JSON.stringify(json, null, 2),
+    ].join('\n');
+    setState({ status: 'thinking', text: '', bad: [] });
+    try {
+      const { text } = await sample(prompt, { onText: ({ text }) => setState((p) => ({ ...p, status: 'writing', text })) });
+      setState({ status: 'done', text, bad: checkNumbers(text, json) });
+    } catch (e) {
+      if (e.code === 'cancelled') return setState({ status: 'idle', text: '', bad: [] });
+      setState({ status: 'error', text: e.text || '', bad: [], msg: SAMPLE_ERRORS[e.code] || 'สรุปไม่สำเร็จ ลองกดอีกครั้ง' });
+    }
+  };
+  const lines = state.text.split('\n').map((l) => l.trim()).filter(Boolean);
+  const busy = state.status === 'thinking' || state.status === 'writing';
+  return html`<div class="card exec">
+    <div class="exec-head">
+      <div>
+        <h2>บทสรุปสำหรับผู้บริหาร</h2>
+        <p class="note">ส่งเฉพาะตัวเลขสรุป ${Object.keys(json).length} ค่าให้ Claude ไม่ส่งข้อมูลรายแถว</p>
+      </div>
+      <button class="btn" disabled=${busy} onClick=${run}>${busy ? 'กำลังสรุป…' : state.status === 'done' ? 'สรุปใหม่' : 'สรุปให้ผู้บริหาร'}</button>
+    </div>
+    ${state.status === 'thinking' && html`<p class="note">Claude กำลังคิด…</p>`}
+    ${lines.length > 0 && html`<ol class="exec-lines">${lines.map((l, i) => html`<li key=${i}>${l}</li>`)}</ol>`}
+    ${state.status === 'error' && html`<p class="err-inline">${state.msg}</p>`}
+    ${state.status === 'done' && html`<p class=${'verify ' + (state.bad.length || lines.length !== 5 ? 'warn' : 'ok')}>
+      ${state.bad.length
+        ? `พบตัวเลขที่ไม่อยู่ใน JSON: ${state.bad.join(', ')} ลองกดสรุปใหม่`
+        : 'ตรวจแล้ว: ทุกตัวเลขในบทสรุปมีอยู่ใน JSON'}${lines.length !== 5 ? ` · ได้ ${lines.length} บรรทัด ไม่ใช่ 5` : ''}
+    </p>`}
+    <details class="json-view"><summary>ดู JSON ที่ส่งให้ Claude</summary><pre>${JSON.stringify(json, null, 2)}</pre></details>
+  </div>`;
+}
+
+// นับคำภาษาไทยด้วยตัวตัดคำของเบราว์เซอร์
+const countWords = (text) => {
+  if (typeof Intl.Segmenter !== 'function') return String(text).split(/\s+/).filter(Boolean).length;
+  let n = 0;
+  for (const seg of new Intl.Segmenter('th', { granularity: 'word' }).segment(text)) if (seg.isWordLike) n++;
+  return n;
+};
+
+const thaiToday = () => {
+  const d = new Date();
+  return d.getDate() + ' ' + TH_MONTH[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+};
+
+// หัวข้อที่รายงานต้องครอบคลุม ตามตัวเลขที่มีใน JSON
+function reportTopics(json) {
+  const has = (k) => Object.keys(json).some((key) => key.startsWith(k));
+  return [
+    'ภาพรวมยอดขาย (ยอดขายสุทธิ คำสั่งซื้อสำเร็จ AOV ช่วงข้อมูลและตัวกรอง)',
+    'แนวโน้มรายเดือน (เดือนยอดสูงสุดและต่ำสุด)',
+    'ช่องทางการขาย (สัดส่วนแต่ละช่องทาง)',
+    'การขนส่ง',
+    'ภูมิภาคและจังหวัด',
+    'การยกเลิกและการคืนสินค้า',
+    has('สัดส่วนยอดวันเมกะเซล') && 'วันเมกะเซลเทียบวันปกติ (สัดส่วนยอดและยอดเฉลี่ยต่อวัน)',
+    has('กำไรขั้นต้น') && 'กำไรขั้นต้น (รวม วันเมกะเซล วันปกติ)',
+  ].filter(Boolean);
+}
+
+// ชั้นข้อความล่องหนทับภาพ ทำให้เลือกและคัดลอกข้อความใน PDF ได้ (ภาพยังแสดงภาษาไทยถูกต้องเหมือนบนจอ)
+function addTextLayer(pdf, paper, pages, k, pad) {
+  if (!window.THAI_FONT_TTF_BASE64) return false;
+  pdf.addFileToVFS('IBMPlexSansThai.ttf', window.THAI_FONT_TTF_BASE64);
+  pdf.addFont('IBMPlexSansThai.ttf', 'PlexThai', 'normal');
+  pdf.setFont('PlexThai', 'normal');
+  const base = paper.getBoundingClientRect();
+  const seg = new Intl.Segmenter('th', { granularity: 'word' });
+  const walker = document.createTreeWalker(paper, NodeFilter.SHOW_TEXT);
+  const lines = [];
+  for (let node; (node = walker.nextNode());) {
+    const text = node.nodeValue;
+    if (!text.trim()) continue;
+    const fs = parseFloat(getComputedStyle(node.parentElement).fontSize);
+    let cur = null;
+    for (const { segment, index } of seg.segment(text)) {
+      const range = document.createRange();
+      range.setStart(node, index); range.setEnd(node, index + segment.length);
+      const rect = [...range.getClientRects()].find((x) => x.width > 0);
+      if (!rect) { if (cur) cur.text += segment; continue; }
+      const top = rect.top - base.top, left = rect.left - base.left;
+      if (cur && Math.abs(top - cur.top) < fs * 0.5) { cur.text += segment; cur.right = left + rect.width; }
+      else { if (cur) lines.push(cur); cur = { text: segment, top, left, right: left + rect.width, h: rect.height, fs }; }
+    }
+    if (cur) lines.push(cur);
+  }
+  for (const ln of lines) {
+    // คงช่องว่างหัวท้ายไว้ เพื่อให้ข้อความจากหลายส่วนในบรรทัดเดียวกันคัดลอกออกมามีเว้นวรรค
+    const t = ln.text.replace(/\s+/g, ' ');
+    if (!t.trim()) continue;
+    const i = pages.findIndex(([a, b]) => ln.top >= a - 2 && ln.top < b);
+    if (i < 0) continue;
+    const y = (ln.top - pages[i][0] + (i ? pad : 0) + ln.h * 0.78) * k;
+    pdf.setPage(i + 1);
+    pdf.setFontSize(ln.fs * k);
+    const natural = pdf.getTextWidth(t), want = (ln.right - ln.left) * k;
+    pdf.text(t, ln.left * k, y, { renderingMode: 'invisible', horizontalScale: natural ? want / natural : 1 });
+  }
+  return true;
+}
+
+// แปลงกระดาษรายงานเป็น PDF ขนาด A4 ตัดหน้าตรงขอบหัวข้อ ไม่ตัดกลางบรรทัด
+async function buildPdf(paper) {
+  if (document.fonts && document.fonts.ready) await document.fonts.ready;
+  const W = paper.offsetWidth, total = paper.offsetHeight;
+  const canvas = await html2canvas(paper, { scale: 2, backgroundColor: '#ffffff', logging: false, width: W, height: total, windowWidth: Math.max(W + 64, document.documentElement.clientWidth) });
+  const s = canvas.width / W;
+  const pageH = W * 297 / 210, pad = 48;
+  const ends = [...paper.querySelectorAll('[data-block]')].map((b) => b.offsetTop + b.offsetHeight);
+  const pages = [];
+  for (let start = 0; start < total - 1;) {
+    const room = pageH - (start ? pad * 2 : pad);
+    let end = start + room;
+    if (end >= total) end = total;
+    else {
+      const fit = ends.filter((e) => e > start + 1 && e <= end);
+      if (fit.length) end = Math.max(...fit);
+    }
+    pages.push([start, end]);
+    start = end;
+  }
+  const pdf = new jspdf.jsPDF({ unit: 'pt', format: 'a4' });
+  const pw = pdf.internal.pageSize.getWidth(), ph = pdf.internal.pageSize.getHeight();
+  pages.forEach(([a, b], i) => {
+    const c = document.createElement('canvas');
+    c.width = canvas.width; c.height = Math.round(pageH * s);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, c.width, c.height);
+    const top = i ? pad * s : 0;
+    ctx.drawImage(canvas, 0, a * s, canvas.width, (b - a) * s, 0, top, canvas.width, (b - a) * s);
+    if (i) pdf.addPage();
+    pdf.addImage(c.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, pw, ph);
+  });
+  addTextLayer(pdf, paper, pages, pw / W, pad);
+  pdf.setProperties({ title: 'บทสรุปผู้บริหาร บ้านสบาย ช็อป' });
+  return pdf.output('blob');
+}
+
+function ReportPaper({ json, report, paperRef, sources }) {
+  const { sections, recommendations } = report;
+  const kpis = [
+    ['ยอดขายสุทธิ', json['ยอดขายสุทธิ_บาท'] != null ? baht(json['ยอดขายสุทธิ_บาท'], 0) : '—'],
+    ['คำสั่งซื้อสำเร็จ', json['คำสั่งซื้อสำเร็จ'] != null ? int(json['คำสั่งซื้อสำเร็จ']) : '—'],
+    ['AOV', json['AOV_บาท'] != null ? baht(json['AOV_บาท']) : '—'],
+    ['อัตรายกเลิก', json['อัตรายกเลิก_pct'] != null ? json['อัตรายกเลิก_pct'] + '%' : '—'],
+    ['อัตราคืนสินค้า', json['อัตราคืนสินค้า_pct'] != null ? json['อัตราคืนสินค้า_pct'] + '%' : '—'],
+  ];
+  return html`<div class="paper" ref=${paperRef}>
+    <header data-block>
+      <p class="paper-eyebrow">บ้านสบาย ช็อป</p>
+      <h1>บทสรุปผู้บริหาร</h1>
+      <p class="paper-meta">ข้อมูล ${json['ช่วงข้อมูล_เริ่ม'] || ''} ถึง ${json['ช่วงข้อมูล_สิ้นสุด'] || ''} · ${json['ตัวกรอง_ภูมิภาค']} · ${json['ตัวกรอง_หมวดสินค้า']} · ${json['ตัวกรอง_เดือน']}</p>
+    </header>
+    <div class="paper-kpis" data-block>
+      ${kpis.map(([k, v]) => html`<div key=${k}><span>${k}</span><b>${v}</b></div>`)}
+    </div>
+    ${sections.map((sec, i) => html`<section key=${i}>
+      <h2 data-block>${sec.heading}</h2>
+      <ul>${sec.bullets.map((b, j) => html`<li key=${j} data-block><span class="dot-b">•</span><span>${b}</span></li>`)}</ul>
+    </section>`)}
+    ${recommendations.length > 0 && html`<section class="recs">
+      <h2 data-block>ข้อเสนอแนะ</h2>
+      <ul>${recommendations.map((r, j) => html`<li key=${j} data-block><span class="dot-b">•</span><div>
+        <b>${r.issue}</b>
+        <p><span class="tag">เหตุ</span>${r.cause}</p>
+        <p><span class="tag">ผล</span>${r.effect}</p>
+        <p><span class="tag">ข้อเสนอ</span>${r.action}</p>
+      </div></li>`)}</ul>
+    </section>`}
+    <footer data-block>สร้างเมื่อ ${thaiToday()} · คำนวณจาก ${sources} · ข้อความเขียนโดย Claude จากตัวเลขสรุป ${Object.keys(json).length} ค่า</footer>
+  </div>`;
+}
+
+const MAX_WORDS_PER_TOPIC = 100;
+
+function PdfReport({ sample, downloads, json, sources }) {
+  const empty = { sections: [], recommendations: [] };
+  const [state, setState] = useState({ status: 'idle', report: empty, bad: [], over: [], maxWords: 0 });
+  const [saveMsg, setSaveMsg] = useState('');
+  const paperRef = useRef(null);
+  const busy = state.status === 'thinking';
+
+  const generate = async () => {
+    const topics = reportTopics(json);
+    const prompt = [
+      'คุณเป็นนักวิเคราะห์ที่เขียนรายงานบทสรุปผู้บริหารให้ร้านออนไลน์ "บ้านสบาย ช็อป" เป็นภาษาไทย',
+      'เขียนหัวข้อย่อยตามลำดับนี้ หัวข้อละ 1 ส่วน:',
+      ...topics.map((t, i) => `${i + 1}. ${t}`),
+      '',
+      'กติกาของหัวข้อย่อย:',
+      '- แต่ละหัวข้อเป็น bullet 2-4 ข้อ แต่ละข้อเป็นประโยคสั้นที่อธิบายตัวเลขใน JSON ที่เกี่ยวกับหัวข้อนั้นให้ครบ',
+      `- ความยาวของ bullet ทั้งหมดในหัวข้อเดียวกันไม่เกิน ${MAX_WORDS_PER_TOPIC - 20} คำ`,
+      '- ชื่อหัวข้อสั้น ไม่มีตัวเลข',
+      '',
+      'กติกาของข้อเสนอแนะ (2-3 ข้อ) เขียนแบบเหตุและผล:',
+      '- issue: ประเด็นสั้น ๆ',
+      '- cause: เหตุ คือสิ่งที่ตัวเลขใน JSON บอก',
+      '- effect: ผล คือผลกระทบต่อยอดขายหรือกำไรของร้าน',
+      '- action: ข้อเสนอ คือวิธีแก้ไขหรือปรับปรุงที่ทำได้จริงสำหรับประเด็นนั้น',
+      `- ความยาวรวมของข้อเสนอแนะทั้งหมดไม่เกิน ${MAX_WORDS_PER_TOPIC - 20} คำ`,
+      '',
+      'กติกาตัวเลข (สำคัญที่สุด):',
+      '- ใช้เฉพาะตัวเลขที่ปรากฏในค่าของ JSON เขียนให้ตรงกับใน JSON (คั่นหลักพันด้วยคอมมาได้)',
+      '- ห้ามคำนวณตัวเลขใหม่ ห้ามปัดเศษ ห้ามแปลงหน่วย ห้ามใช้ตัวเลขอื่นใดเลย รวมถึงปี จำนวนวัน จำนวนนับ เป้าหมาย และเลขลำดับ',
+      '- ชื่อเดือนให้เขียนตามที่อยู่ใน JSON คีย์ที่ลงท้าย _pct คือเปอร์เซ็นต์ คีย์ที่ลงท้าย _บาท คือบาท',
+      '',
+      'ตอบเป็น JSON อย่างเดียวในรูปแบบ',
+      '{"sections":[{"heading":"...","bullets":["...","..."]}],"recommendations":[{"issue":"...","cause":"...","effect":"...","action":"..."}]}',
+      '',
+      'JSON ตัวเลขสรุป:',
+      JSON.stringify(json, null, 2),
+    ].join('\n');
+    setSaveMsg('');
+    setState({ status: 'thinking', report: empty, bad: [], over: [], maxWords: 0 });
+    try {
+      const res = await sample.json(prompt);
+      const str = (v) => String(v == null ? '' : v).trim();
+      const sections = (Array.isArray(res && res.sections) ? res.sections : [])
+        .map((x) => ({ heading: str(x.heading), bullets: (Array.isArray(x.bullets) ? x.bullets : []).map(str).filter(Boolean) }))
+        .filter((x) => x.heading && x.bullets.length);
+      const recommendations = (Array.isArray(res && res.recommendations) ? res.recommendations : [])
+        .map((r) => ({ issue: str(r.issue), cause: str(r.cause), effect: str(r.effect), action: str(r.action) }))
+        .filter((r) => r.issue && r.action);
+      if (!sections.length) throw { code: 'invalid_json' };
+      // นับคำต่อหัวข้อ (ข้อเสนอแนะนับเป็น 1 หัวข้อ)
+      const parts = [
+        ...sections.map((x) => ({ name: x.heading, text: x.bullets.join(' ') })),
+        recommendations.length && { name: 'ข้อเสนอแนะ', text: recommendations.map((r) => [r.issue, r.cause, r.effect, r.action].join(' ')).join(' ') },
+      ].filter(Boolean).map((p) => ({ ...p, words: countWords(p.text) }));
+      const all = parts.map((p) => p.text).join('\n') + '\n' + sections.map((x) => x.heading).join('\n');
+      setState({
+        status: 'done', report: { sections, recommendations },
+        bad: checkNumbers(all, json),
+        over: parts.filter((p) => p.words > MAX_WORDS_PER_TOPIC),
+        maxWords: Math.max(...parts.map((p) => p.words)),
+      });
+    } catch (e) {
+      setState({ status: 'error', report: empty, bad: [], over: [], maxWords: 0,
+        msg: e.code === 'invalid_json' ? 'Claude ตอบกลับไม่เป็นรูปแบบที่อ่านได้ ลองกดอีกครั้ง' : (SAMPLE_ERRORS[e.code] || 'สร้างรายงานไม่สำเร็จ ลองกดอีกครั้ง') });
+    }
+  };
+
+  const save = async () => {
+    setSaveMsg('กำลังสร้างไฟล์ PDF…');
+    try {
+      const blob = await buildPdf(paperRef.current);
+      const stamp = new Date().toISOString().slice(0, 10);
+      await downloads.save({ filename: `บทสรุปผู้บริหาร-บ้านสบาย-${stamp}.pdf`, data: blob });
+      setSaveMsg('บันทึกไฟล์ PDF แล้ว ข้อความในไฟล์เลือกและคัดลอกได้');
+    } catch (e) {
+      setSaveMsg(e && e.code === 'declined' ? 'ยกเลิกการบันทึกไฟล์' : 'บันทึก PDF ไม่สำเร็จ ลองอีกครั้ง');
+    }
+  };
+
+  const warn = state.bad.length || state.over.length;
+  return html`<div class="card exec">
+    <div class="exec-head">
+      <div>
+        <h2>รายงาน PDF สำหรับผู้บริหาร</h2>
+        <p class="note">หัวข้อย่อยตามตัวเลขสรุป เป็น bullet ไม่เกิน ${MAX_WORDS_PER_TOPIC} คำต่อหัวข้อ ข้อเสนอแนะเขียนแบบเหตุและผล</p>
+      </div>
+      <div class="btn-row">
+        <button class="btn" disabled=${busy} onClick=${generate}>${busy ? 'กำลังเขียนรายงาน…' : state.status === 'done' ? 'เขียนรายงานใหม่' : 'สรุปให้ผู้บริหาร (PDF)'}</button>
+        ${state.status === 'done' && downloads && html`<button class="btn ghost" onClick=${save}>ดาวน์โหลด PDF</button>`}
+      </div>
+    </div>
+    ${busy && html`<p class="note">Claude กำลังเขียนรายงาน อาจใช้เวลาราว 1 นาที…</p>`}
+    ${state.status === 'error' && html`<p class="err-inline">${state.msg}</p>`}
+    ${state.status === 'done' && html`<p class=${'verify ' + (warn ? 'warn' : 'ok')}>
+      ${state.bad.length ? `พบตัวเลขที่ไม่อยู่ใน JSON: ${state.bad.join(', ')}` : 'ตรวจแล้ว: ทุกตัวเลขในรายงานมีอยู่ใน JSON'}
+      · ${state.over.length
+        ? `หัวข้อที่เกิน ${MAX_WORDS_PER_TOPIC} คำ: ${state.over.map((p) => `${p.name} (${p.words} คำ)`).join(', ')} ลองเขียนใหม่`
+        : `ทุกหัวข้อไม่เกิน ${MAX_WORDS_PER_TOPIC} คำ (ยาวสุด ${state.maxWords} คำ)`}
+    </p>`}
+    ${state.status === 'done' && !downloads && html`<p class="note">ดาวน์โหลด PDF ได้เมื่อเปิดหน้านี้บน claude.ai</p>`}
+    ${saveMsg && html`<p class="note">${saveMsg}</p>`}
+    ${state.status === 'done' && html`<div class="paper-wrap">
+      <${ReportPaper} json=${json} report=${state.report} paperRef=${paperRef} sources=${sources} />
+    </div>`}
+  </div>`;
+}
+
+const ICON_PATHS = {
+  logo: 'M3 17l6-6 4 4 8-8M15 7h6v6',
+  net: 'M6 2l-3 4v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0',
+  orders: 'M20 6L9 17l-5-5',
+  aov: 'M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6',
+  cancel: 'M12 22a10 10 0 100-20 10 10 0 000 20zM15 9l-6 6M9 9l6 6',
+  ret: 'M3 12a9 9 0 109-9 9.7 9.7 0 00-6.7 2.7L3 8M3 3v5h5',
+  dash: 'M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z',
+  mega: 'M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7',
+  doc: 'M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M8 13h8M8 17h8',
+  upload: 'M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12',
+};
+const Icon = ({ name, size = 18 }) => html`<svg width=${size} height=${size} viewBox="0 0 24 24" fill="none" stroke="currentColor"
+  stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d=${ICON_PATHS[name]} /></svg>`;
+
+function Spark({ values }) {
+  if (!values || values.length < 2) return html`<span class="spark"></span>`;
+  const w = 78, h = 30, min = Math.min(...values), max = Math.max(...values), span = max - min || 1;
+  const pts = values.map((v, i) => [i / (values.length - 1) * w, h - 2 - (v - min) / span * (h - 6)]);
+  const line = pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ',' + q[1].toFixed(1)).join('');
+  const id = 'sp' + Math.abs(values.reduce((a, v) => (a * 31 + Math.round(v * 100)) | 0, 7));
+  return html`<svg class="spark" viewBox=${`0 0 ${w} ${h}`} aria-hidden="true">
+    <defs><linearGradient id=${id} x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" style=${{ stopColor: 'var(--k)', stopOpacity: 0.28 }} /><stop offset="1" style=${{ stopColor: 'var(--k)', stopOpacity: 0 }} />
+    </linearGradient></defs>
+    <path d=${line + `L${w},${h}L0,${h}Z`} fill=${`url(#${id})`} />
+    <path d=${line} fill="none" stroke="var(--k)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+  </svg>`;
+}
+
+// ตัวชี้วัดรายเดือน ใช้ทำเส้นแนวโน้มและเทียบกับเดือนก่อน (ตัวกรองเดือนไม่มีผลกับส่วนนี้)
+function monthlySeries(rows) {
+  const by = new Map();
+  for (const r of rows) {
+    if (!/^\d{4}-\d{2}$/.test(r.month)) continue;
+    const m = by.get(r.month) || { net: 0, ok: 0, cancel: 0, ret: 0, total: 0 };
+    m.total++;
+    if (r.status === OK) { m.ok++; m.net += r.net; }
+    else if (r.status === CANCEL) m.cancel++;
+    else if (r.status === RETURN) m.ret++;
+    by.set(r.month, m);
+  }
+  return [...by].sort((a, b) => a[0].localeCompare(b[0])).map(([month, m]) => ({
+    month, net: m.net, ok: m.ok, aov: m.ok ? m.net / m.ok : 0,
+    cancel: m.total ? m.cancel / m.total * 100 : 0, ret: m.total ? m.ret / m.total * 100 : 0,
+  }));
+}
+
+// เทียบเดือนที่เลือก (หรือเดือนล่าสุด) กับเดือนก่อนหน้า
+function deltaOf(series, key, month, kind, lowerIsBetter) {
+  const i = month ? series.findIndex((x) => x.month === month) : series.length - 1;
+  if (i < 1) return null;
+  const cur = series[i][key], prev = series[i - 1][key];
+  const diff = kind === 'pp' ? cur - prev : (prev ? (cur - prev) / prev * 100 : null);
+  if (diff == null || !Number.isFinite(diff)) return null;
+  const good = lowerIsBetter ? diff <= 0 : diff >= 0;
+  const text = (diff >= 0 ? '▲ ' : '▼ ') + Math.abs(diff).toFixed(1) + (kind === 'pp' ? ' จุด' : '%');
+  return { text, good, vs: monthLabel(series[i - 1].month) };
+}
+
+function KpiCard({ cls, icon, label, value, delta, spark }) {
+  return html`<div class=${'kpi ' + cls}>
+    <span class="lbl"><span class="kpi-icon"><${Icon} name=${icon} size=${16} /></span>${label}</span>
+    <span class="val">${value}</span>
+    <div class="kpi-foot">
+      <span class="delta">${delta
+        ? html`<b class=${delta.good ? 'good' : 'bad'}>${delta.text}</b><span>เทียบ ${delta.vs}</span>`
+        : html`<span>ไม่มีเดือนก่อนให้เทียบ</span>`}</span>
+      <${Spark} values=${spark} />
+    </div>
+  </div>`;
+}
+
+function App() {
+  const [file, setFile] = useState(null);      // { name, rows, total, parseErrors }
+  const [error, setError] = useState('');
+  const [over, setOver] = useState(false);
+  const [region, setRegion] = useState(ALL);
+  const [category, setCategory] = useState(ALL);
+  const [month, setMonth] = useState(ALL);
+  const [products, setProducts] = useState(null);   // { name, cost: Map(product_id → unit_cost) }
+  const [tab, setTab] = useState('overview');
+  const [sample, setSample] = useState(null);
+  const [downloads, setDownloads] = useState(null);
+  const input = useRef(null);
+  const productsInput = useRef(null);
+
+  useEffect(() => {
+    let live = true;
+    window.claude?.use?.('sample').then((fn) => { if (live) setSample(() => fn); }).catch(() => {});
+    window.claude?.use?.('downloads').then((d) => { if (live) setDownloads(d); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
+
+  const loadProducts = (f) => {
+    if (!f) return;
+    setError('');
+    Papa.parse(f, {
+      header: true,
+      skipEmptyLines: true,
+      transformHeader: (h) => h.replace(/^﻿/, '').trim(),
+      complete: (res) => {
+        const cols = res.meta.fields || [];
+        if (!cols.includes('product_id') || !cols.includes('unit_cost')) {
+          setError(`ไฟล์ ${f.name} ไม่มีคอลัมน์ product_id หรือ unit_cost ตรวจว่าเป็น products.csv แล้วอัปโหลดใหม่`);
+          return;
+        }
+        const cost = new Map(res.data.map((p) => [String(p.product_id).trim(), Number(p.unit_cost)]).filter(([, c]) => Number.isFinite(c)));
+        setProducts({ name: f.name, cost });
+      },
+      error: (e) => setError('อ่านไฟล์ไม่ได้: ' + e.message),
+    });
+  };
+
+  const load = (f) => {
+    if (!f) return;
+    setError('');
+    Papa.parse(f, {
+      header: true,
+      skipEmptyLines: true,
+      encoding: 'UTF-8',
+      transformHeader: (h) => h.replace(/^﻿/, '').trim(),
+      complete: (res) => {
+        const cols = res.meta.fields || [];
+        const missing = REQUIRED.filter((c) => !cols.includes(c));
+        if (missing.length) {
+          setError(`ไฟล์ ${f.name} ไม่มีคอลัมน์ ${missing.join(', ')} ตรวจว่าเป็น orders.csv ของบ้านสบายแล้วอัปโหลดใหม่`);
+          return;
+        }
+        setFile({ name: f.name, rows: prepare(res.data), total: res.data.length, parseErrors: res.errors.length });
+        setRegion(ALL); setCategory(ALL); setMonth(ALL);
+      },
+      error: (e) => setError('อ่านไฟล์ไม่ได้: ' + e.message),
+    });
+  };
+
+  const regions = useMemo(() => file ? [...new Set(file.rows.map((r) => r.region))].sort((a, b) => a.localeCompare(b, 'th')) : [], [file]);
+  const categories = useMemo(() => file ? [...new Set(file.rows.map((r) => r.category))].sort((a, b) => a.localeCompare(b, 'th')) : [], [file]);
+  const months = useMemo(() => file ? [...new Set(file.rows.map((r) => r.month))].filter((m) => /^\d{4}-\d{2}$/.test(m)).sort() : [], [file]);
+  const rows = useMemo(() => file ? file.rows.filter((r) =>
+    (!region || r.region === region) && (!category || r.category === category) && (!month || r.month === month)) : [], [file, region, category, month]);
+  const s = useMemo(() => summarize(rows), [rows]);
+  const mega = useMemo(() => megaSummary(rows, products && products.cost), [rows, products]);
+  const summaryJson = useMemo(() => buildSummaryJson(s, mega, !!products, region, category, month), [s, mega, products, region, category, month]);
+  const filtered = region || category || month;
+  const series = useMemo(() => file ? monthlySeries(file.rows.filter((r) => (!region || r.region === region) && (!category || r.category === category))) : [], [file, region, category]);
+  const pickTab = (id) => { setTab(id); window.scrollTo({ top: 0 }); };
+
+  const picker = html`<input ref=${input} id="csv" class="hidden-input" type="file" accept=".csv,text/csv"
+    onChange=${(e) => { load(e.target.files[0]); e.target.value = ''; }} />
+    <input ref=${productsInput} id="products-csv" class="hidden-input" type="file" accept=".csv,text/csv"
+    onChange=${(e) => { loadProducts(e.target.files[0]); e.target.value = ''; }} />`;
+
+  const NAV = [['overview', 'dash', 'ภาพรวม'], ['mega', 'mega', 'วันเมกะเซล'], ['exec', 'doc', 'บทสรุปผู้บริหาร']];
+  return html`<div class="app">
+   <aside class="side" aria-label="เมนู">
+    <div class="brand">
+      <span class="logo"><${Icon} name="logo" size=${22} /></span>
+      <span><b>บ้านสบาย ช็อป</b><small>ยอดขายออนไลน์</small></span>
+    </div>
+    <span class="side-label">เมนูหลัก</span>
+    <nav class="side-nav">
+      ${NAV.map(([id, icon, label]) => html`<button key=${id} class=${tab === id && file ? 'on' : ''} disabled=${!file} onClick=${() => pickTab(id)}>
+        <${Icon} name=${icon} />${label}</button>`)}
+    </nav>
+    <div class="side-card">
+      <b>${file ? file.name : 'ยังไม่มีไฟล์'}</b>
+      <p>${file ? `อ่านได้ ${int(file.total)} แถว${products ? ' · มีต้นทุนสินค้า' : ''}` : 'อัปโหลด orders.csv เพื่อดูตัวเลข'}</p>
+      <button class="btn" onClick=${() => input.current.click()}><${Icon} name="upload" size=${16} />${file ? 'อัปโหลดไฟล์ใหม่' : 'เลือกไฟล์'}</button>
+    </div>
+   </aside>
+   <main class="wrap">
+    <header class="head">
+      <div>
+        <h1>${!file ? 'บ้านสบาย ช็อป' : { overview: 'ภาพรวมยอดขาย', mega: 'วันเมกะเซล', exec: 'บทสรุปผู้บริหาร' }[tab]}</h1>
+        <p class="sub">${file ? `ข้อมูลปีงบ 1 ต.ค. 2568 – 30 ก.ย. 2569 · ไฟล์ ${file.name}` : 'อัปโหลด orders.csv เพื่อดูตัวเลข'}</p>
+      </div>
+      ${file && html`<div class="head-actions">
+        <label><span class="vh">ภูมิภาค</span>
+          <select id="f-region" value=${region} onChange=${(e) => setRegion(e.target.value)}>
+            <option value="">ทุกภูมิภาค</option>
+            ${regions.map((r) => html`<option key=${r} value=${r}>${r}</option>`)}
+          </select></label>
+        <label><span class="vh">หมวดสินค้า</span>
+          <select id="f-category" value=${category} onChange=${(e) => setCategory(e.target.value)}>
+            <option value="">ทุกหมวด</option>
+            ${categories.map((c) => html`<option key=${c} value=${c}>${c}</option>`)}
+          </select></label>
+        <label><span class="vh">เดือน</span>
+          <select id="f-month" value=${month} onChange=${(e) => setMonth(e.target.value)}>
+            <option value="">ทุกเดือน</option>
+            ${months.map((m) => html`<option key=${m} value=${m}>${monthLabel(m, true)}</option>`)}
+          </select></label>
+        ${filtered && html`<button class="btn ghost" onClick=${() => { setRegion(ALL); setCategory(ALL); setMonth(ALL); }}>ล้างตัวกรอง</button>`}
+      </div>`}
+      ${picker}
+    </header>
+
+    ${error && html`<div class="err" role="alert">${error}</div>`}
+
+    ${!file && html`<div class=${'drop' + (over ? ' over' : '')} tabindex="0" role="button" aria-label="เลือกไฟล์ orders.csv"
+        onClick=${() => input.current.click()}
+        onKeyDown=${(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), input.current.click())}
+        onDragOver=${(e) => { e.preventDefault(); setOver(true); }}
+        onDragLeave=${() => setOver(false)}
+        onDrop=${(e) => { e.preventDefault(); setOver(false); load(e.dataTransfer.files[0]); }}>
+      <h2>ลากไฟล์ orders.csv มาวาง หรือกดเพื่อเลือกไฟล์</h2>
+      <p>ไฟล์ CSV แบบ UTF-8 (มี BOM ได้) อ่านในเครื่องของคุณเท่านั้น ไม่มีการส่งข้อมูลออกไปที่ไหน</p>
+      <span class="btn">เลือกไฟล์</span>
+    </div>`}
+
+    ${file && html`<${React.Fragment}>
+      <section class="kpis" aria-label="ตัวชี้วัดหลัก">
+        <${KpiCard} cls="k-net" icon="net" label="ยอดขายสุทธิ" value=${baht(s.net, 0)}
+          delta=${deltaOf(series, 'net', month, '%', false)} spark=${series.map((x) => x.net)} />
+        <${KpiCard} cls="k-ok" icon="orders" label="คำสั่งซื้อสำเร็จ" value=${int(s.okCount)}
+          delta=${deltaOf(series, 'ok', month, '%', false)} spark=${series.map((x) => x.ok)} />
+        <${KpiCard} cls="k-aov" icon="aov" label="AOV" value=${baht(s.aov)}
+          delta=${deltaOf(series, 'aov', month, '%', false)} spark=${series.map((x) => x.aov)} />
+        <${KpiCard} cls="k-cancel" icon="cancel" label="อัตรายกเลิก" value=${s.cancelRate.toFixed(2) + '%'}
+          delta=${deltaOf(series, 'cancel', month, 'pp', true)} spark=${series.map((x) => x.cancel)} />
+        <${KpiCard} cls="k-return" icon="ret" label="อัตราคืนสินค้า" value=${s.returnRate.toFixed(2) + '%'}
+          delta=${deltaOf(series, 'ret', month, 'pp', true)} spark=${series.map((x) => x.ret)} />
+      </section>
+
+      <div class="check" aria-label="ตรวจสอบข้อมูล">
+        <span>อ่านได้ <b>${int(file.total)}</b> แถว${filtered ? html` · ตรงตัวกรอง <b>${int(rows.length)}</b> แถว` : ''}</span>
+        ${s.status.map(([st, n]) => html`<span class="chip" key=${st}><span class=${'dot ' + statusDot(st)}></span>${st} ${int(n)}</span>`)}
+        ${file.parseErrors > 0 && html`<span class="chip"><span class="dot bad"></span>แถวที่อ่านผิดรูปแบบ ${int(file.parseErrors)}</span>`}
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="มุมมอง">
+        ${[['overview', 'ภาพรวม'], ['mega', 'วันเมกะเซล'], ['exec', 'บทสรุปผู้บริหาร']].map(([id, label]) => html`
+          <button key=${id} role="tab" id=${'tab-' + id} aria-selected=${tab === id} class=${tab === id ? 'on' : ''} onClick=${() => pickTab(id)}>${label}</button>`)}
+      </nav>
+
+      ${tab === 'exec' && (sample
+        ? html`<${React.Fragment}>
+            <${ExecSummary} sample=${sample} json=${summaryJson} />
+            <${PdfReport} sample=${sample} downloads=${downloads} json=${summaryJson}
+              sources=${products ? 'orders.csv และ products.csv' : 'orders.csv'} />
+          <//>`
+        : html`<div class="card"><h2>บทสรุปผู้บริหาร</h2>
+            <p class="note">ปุ่มสรุปใช้ Claude ได้เมื่อเปิดหน้านี้บน claude.ai ${products ? '' : '· อัปโหลด products.csv ในแท็บวันเมกะเซลก่อน เพื่อให้รายงานมีกำไรขั้นต้น'}</p>
+            <details class="json-view" open><summary>JSON ตัวเลขสรุปที่จะส่ง (${Object.keys(summaryJson).length} ค่า)</summary><pre>${JSON.stringify(summaryJson, null, 2)}</pre></details>
+          </div>`)}
+
+      ${tab === 'mega' && html`<${MegaTab} m=${mega} hasCost=${!!products} productsName=${products && products.name}
+        onPickProducts=${() => productsInput.current.click()} />`}
+
+      ${tab === 'overview' && html`<${React.Fragment}>
+      <section class="charts">
+        <div class="card">
+          <h2>ยอดขายสุทธิรายเดือน</h2>
+          <p class="note">เรียงตามเวลา ชี้ที่กราฟเพื่อดูยอดแต่ละเดือน</p>
+          <${LineChart} data=${s.months} />
+        </div>
+        <div class="card">
+          <h2>ยอดขายสุทธิตามช่องทาง</h2>
+          <p class="note">สัดส่วนจากยอดขายสุทธิในตัวกรองนี้</p>
+          <${ChannelBars} data=${s.channels} total=${s.net} />
+        </div>
+        <div class="card wide">
+          <h2>ยอดขายสุทธิตามบริษัทขนส่ง แยกหมวดสินค้า</h2>
+          <p class="note">ตัวเลขในแท่งคือ % ของยอดขายสุทธิของบริษัทนั้น ชี้ที่แต่ละช่วงเพื่อดูยอดเป็นบาท</p>
+          <${CarrierStack} data=${s.carriers} cats=${categories} />
+        </div>
+      </section>
+
+      <section class="section-head">
+        <h2>จังหวัดที่ขายได้มากที่สุดในแต่ละภูมิภาค</h2>
+        <p class="note">ยอดขายสุทธิของทุกจังหวัดในภูมิภาค เรียงภูมิภาคจากยอดรวมมากไปน้อย แท่งในแต่ละการ์ดเทียบกับจังหวัดอันดับ 1 ของภูมิภาคนั้น</p>
+      </section>
+      <${ProvinceMapCard} regions=${s.regions} />
+      ${s.regions.length
+        ? html`<section class="regions">${s.regions.map((r) => html`<${RegionCard} key=${r.region} r=${r} />`)}</section>`
+        : html`<p class="empty">ไม่มีคำสั่งซื้อที่จัดส่งสำเร็จในตัวกรองนี้</p>`}
+      <//>`}
+    <//>`}
+   </main>
+  </div>`;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App} />`);
+</script>
