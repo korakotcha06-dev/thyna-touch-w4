@@ -4,6 +4,8 @@
 
 หน้าเว็บ React ไฟล์เดียว ผู้ใช้อัปโหลด `orders.csv` เอง ไม่ฝังข้อมูลในโค้ด และอ่านในเครื่องด้วย PapaParse
 
+**เปิดใช้งาน:** [https://claude.ai/artifact/X7AcjLQVgjWYd8EmnNJqzw?sk=OvtGPsxxKY2bBVHaP5nTLQ](https://claude.ai/artifact/X7AcjLQVgjWYd8EmnNJqzw?sk=OvtGPsxxKY2bBVHaP5nTLQ)
+
 ## นิยาม
 
 - **ยอดขายสุทธิ** = qty × unit_price × (1 − discount_pct/100) เฉพาะ status = "จัดส่งสำเร็จ" ไม่รวม shipping_fee

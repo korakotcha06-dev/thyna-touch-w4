@@ -2,6 +2,8 @@
 
 งานเวิร์กช็อป "AI Model, LLM และ Vibe Coding สำหรับงานวิเคราะห์ข้อมูล" (ADT-RAISE) ร้านค้าออนไลน์สมมติ ข้อมูลปีงบ 1 ต.ค. 2025 – 30 ก.ย. 2026 ข้อมูลส่วนบุคคลทั้งหมดเป็นของปลอม
 
+**เปิดแดชบอร์ด:** [https://claude.ai/artifact/X7AcjLQVgjWYd8EmnNJqzw?sk=OvtGPsxxKY2bBVHaP5nTLQ](https://claude.ai/artifact/X7AcjLQVgjWYd8EmnNJqzw?sk=OvtGPsxxKY2bBVHaP5nTLQ) (ปุ่มบทสรุปผู้บริหารและดาวน์โหลด PDF ใช้ได้เมื่อเปิดผ่านลิงก์นี้)
+
 | โฟลเดอร์ | เนื้อหา |
 |---|---|
 | `dashboard/` | แดชบอร์ด React (คาบ 3 · W3-A/W3-B) อัปโหลด `orders.csv` แล้วดู KPI กราฟ แผนที่ วันเมกะเซล และบทสรุปผู้บริหาร |
