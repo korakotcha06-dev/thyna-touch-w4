@@ -99,10 +99,19 @@ h2 { font-family: var(--font-display); font-weight: 500; font-size: 1.08rem; mar
 .btn.ghost { background: var(--panel); color: var(--accent); border-color: var(--line); }
 .btn svg { flex: none; }
 .btn:focus-visible, select:focus-visible, .drop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.drop { border: 1.5px dashed var(--line); border-radius: var(--r); background: var(--panel); padding: 48px 20px;
+.drops { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr)); gap: 16px; }
+.drops-note { margin: 0; font-size: .82rem; color: var(--muted); }
+.drop { position: relative; border: 1.5px dashed var(--line); border-radius: var(--r); background: var(--panel); padding: 36px 20px 28px;
   display: grid; gap: 10px; justify-items: center; text-align: center; cursor: pointer; }
 .drop.over { border-color: var(--accent); background: var(--accent-soft); }
-.drop p { margin: 0; color: var(--muted); max-width: 60ch; }
+.drop p { margin: 0; color: var(--muted); max-width: 40ch; font-size: .9rem; }
+.drop.done { border-style: solid; border-color: var(--ok); }
+.drop-step { position: absolute; top: 14px; left: 16px; font-size: .75rem; color: var(--muted); font-weight: 600; }
+.drop-icon { width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center; color: var(--accent); background: var(--accent-soft); }
+.drop.done .drop-icon { color: var(--ok); background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.drop-file { font-family: inherit; font-size: .85rem; color: var(--muted); margin-top: -6px; }
+.drop-need { font-size: .75rem; font-weight: 600; padding: 2px 10px; border-radius: 999px; background: var(--bg); color: var(--muted); }
+.drop-need.ok { color: var(--ok); }
 .err { color: var(--bad); background: var(--panel); border: 1px solid var(--bad); border-radius: var(--r); padding: 10px 14px; }
 .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .filters label { display: block; }
@@ -1231,6 +1240,24 @@ function KpiCard({ cls, icon, label, value, delta, spark }) {
   </div>`;
 }
 
+function DropBox({ id, step, title, fname, need, desc, done, status, over, setOver, onPick, onFiles }) {
+  return html`<div class=${'drop' + (over === id ? ' over' : '') + (done ? ' done' : '')} tabindex="0" role="button"
+      aria-label=${`เลือกไฟล์ ${fname}`}
+      onClick=${onPick}
+      onKeyDown=${(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onPick())}
+      onDragOver=${(e) => { e.preventDefault(); setOver(id); }}
+      onDragLeave=${() => setOver(null)}
+      onDrop=${(e) => { e.preventDefault(); setOver(null); onFiles([...e.dataTransfer.files]); }}>
+    <span class="drop-step">${step}</span>
+    <span class="drop-icon"><${Icon} name=${done ? 'orders' : 'upload'} size=${22} /></span>
+    <h2>${title}</h2>
+    <code class="drop-file">${fname}</code>
+    <span class=${'drop-need' + (done ? ' ok' : '')}>${done ? status : need}</span>
+    <p>${desc}</p>
+    <span class=${'btn' + (done ? ' ghost' : '')}>${done ? 'เปลี่ยนไฟล์' : 'เลือกไฟล์'}</span>
+  </div>`;
+}
+
 function FilesPanel({ file, products, onPickOrders, onPickProducts, className }) {
   const slots = [
     { key: 'orders', title: 'ยอดขาย', fname: 'orders.csv', need: 'จำเป็น',
@@ -1251,7 +1278,7 @@ function FilesPanel({ file, products, onPickOrders, onPickProducts, className })
 function App() {
   const [file, setFile] = useState(null);      // { name, rows, total, parseErrors }
   const [error, setError] = useState('');
-  const [over, setOver] = useState(false);
+  const [over, setOver] = useState(null);   // กล่องที่กำลังลากไฟล์ผ่าน
   const [region, setRegion] = useState(ALL);
   const [category, setCategory] = useState(ALL);
   const [monthFrom, setMonthFrom] = useState(ALL);
@@ -1359,8 +1386,8 @@ function App() {
       ${NAV.map(([id, icon, label]) => html`<button key=${id} class=${tab === id && file ? 'on' : ''} disabled=${!file} onClick=${() => pickTab(id)}>
         <${Icon} name=${icon} />${label}</button>`)}
     </nav>
-    <${FilesPanel} className="files-side" file=${file} products=${products}
-      onPickOrders=${() => input.current.click()} onPickProducts=${() => productsInput.current.click()} />
+    ${file && html`<${FilesPanel} className="files-side" file=${file} products=${products}
+      onPickOrders=${() => input.current.click()} onPickProducts=${() => productsInput.current.click()} />`}
    </aside>
    <main class="wrap">
     <header class="head">
@@ -1397,22 +1424,24 @@ function App() {
       ${picker}
     </header>
 
-    <${FilesPanel} className="files-inline" file=${file} products=${products}
-      onPickOrders=${() => input.current.click()} onPickProducts=${() => productsInput.current.click()} />
+    ${file && html`<${FilesPanel} className="files-inline" file=${file} products=${products}
+      onPickOrders=${() => input.current.click()} onPickProducts=${() => productsInput.current.click()} />`}
 
     ${error && html`<div class="err" role="alert">${error}</div>`}
 
-    ${!file && html`<div class=${'drop' + (over ? ' over' : '')} tabindex="0" role="button" aria-label="เลือกไฟล์ orders.csv"
-        onClick=${() => input.current.click()}
-        onKeyDown=${(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), input.current.click())}
-        onDragOver=${(e) => { e.preventDefault(); setOver(true); }}
-        onDragLeave=${() => setOver(false)}
-        onDrop=${(e) => { e.preventDefault(); setOver(false); [...e.dataTransfer.files].forEach(routeFile); }}>
-      <h2>ลากไฟล์ orders.csv มาวาง หรือกดเพื่อเลือกไฟล์</h2>
-      <p>ลากมาพร้อมกับ products.csv ได้เลย ระบบแยกให้เองจากหัวคอลัมน์</p>
-      <p>ไฟล์ CSV แบบ UTF-8 (มี BOM ได้) อ่านในเครื่องของคุณเท่านั้น ไม่มีการส่งข้อมูลออกไปที่ไหน</p>
-      <span class="btn">เลือกไฟล์</span>
-    </div>`}
+    ${!file && html`<${React.Fragment}>
+      <section class="drops" aria-label="อัปโหลดไฟล์ข้อมูล">
+        <${DropBox} id="orders" step="1" title="ข้อมูลยอดขาย" fname="orders.csv" need="จำเป็น"
+          desc="คำสั่งซื้อทั้งหมด ใช้ทำ KPI กราฟ แผนที่ และบทสรุป"
+          done=${false} over=${over} setOver=${setOver}
+          onPick=${() => input.current.click()} onFiles=${(fs) => fs.forEach(routeFile)} />
+        <${DropBox} id="products" step="2" title="ต้นทุนสินค้า" fname="products.csv" need="ไม่บังคับ"
+          desc="ใช้ unit_cost คำนวณกำไรขั้นต้นในแท็บวันเมกะเซลและบทสรุปผู้บริหาร"
+          done=${!!products} status=${products ? `${products.name} · ${int(products.cost.size)} สินค้า` : ''} over=${over} setOver=${setOver}
+          onPick=${() => productsInput.current.click()} onFiles=${(fs) => fs.forEach(routeFile)} />
+      </section>
+      <p class="drops-note">ไฟล์ CSV แบบ UTF-8 (มี BOM ได้) อ่านในเครื่องของคุณเท่านั้น ไม่มีการส่งข้อมูลออกไปที่ไหน · ลากทั้งสองไฟล์มาวางกล่องไหนก็ได้ ระบบแยกจากหัวคอลัมน์ให้เอง · แดชบอร์ดเปิดเมื่อมี orders.csv</p>
+    <//>`}
 
     ${file && html`<${React.Fragment}>
       <section class="kpis" aria-label="ตัวชี้วัดหลัก">
