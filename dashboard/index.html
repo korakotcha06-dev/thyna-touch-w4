@@ -246,6 +246,9 @@ select { font: inherit; font-size: .9rem; color: var(--fg); background: var(--pa
 .rank .rbar { grid-column: 2 / -1; height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--bar) 14%, transparent); overflow: hidden; }
 .rank .rbar i { display: block; height: 100%; background: var(--bar); border-radius: 999px; }
 @media (max-width: 820px) { .map-body { grid-template-columns: minmax(0, 1fr); } }
+.range { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.range-sep { color: var(--muted); font-size: .85rem; }
+#f-from, #f-to { min-width: 9.5rem; }
 .hidden-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 </style>
 
@@ -776,12 +779,12 @@ function MegaTab({ m, hasCost, productsName, onPickProducts }) {
 }
 
 // JSON ตัวเลขสรุป ไม่เกิน 30 ค่า ไม่มีข้อมูลดิบรายแถว
-function buildSummaryJson(s, m, hasCost, region, category, month) {
+function buildSummaryJson(s, m, hasCost, region, category, monthRange) {
   const r0 = (v) => Math.round(v), r2 = (v) => Math.round(v * 100) / 100;
   const out = {
     'ตัวกรอง_ภูมิภาค': region || 'ทุกภูมิภาค',
     'ตัวกรอง_หมวดสินค้า': category || 'ทุกหมวด',
-    'ตัวกรอง_เดือน': month ? monthLabel(month, true) : 'ทุกเดือน',
+    'ตัวกรอง_ช่วงเดือน': monthRange,
   };
   if (s.months.length) {
     const sorted = [...s.months].sort((a, b) => b[1] - a[1]);
@@ -1002,7 +1005,7 @@ function ReportPaper({ json, report, paperRef, sources }) {
     <header data-block>
       <p class="paper-eyebrow">บ้านสบาย ช็อป</p>
       <h1>บทสรุปผู้บริหาร</h1>
-      <p class="paper-meta">ข้อมูล ${json['ช่วงข้อมูล_เริ่ม'] || ''} ถึง ${json['ช่วงข้อมูล_สิ้นสุด'] || ''} · ${json['ตัวกรอง_ภูมิภาค']} · ${json['ตัวกรอง_หมวดสินค้า']} · ${json['ตัวกรอง_เดือน']}</p>
+      <p class="paper-meta">ข้อมูล ${json['ช่วงข้อมูล_เริ่ม'] || ''} ถึง ${json['ช่วงข้อมูล_สิ้นสุด'] || ''} · ${json['ตัวกรอง_ภูมิภาค']} · ${json['ตัวกรอง_หมวดสินค้า']} · ${json['ตัวกรอง_ช่วงเดือน']}</p>
     </header>
     <div class="paper-kpis" data-block>
       ${kpis.map(([k, v]) => html`<div key=${k}><span>${k}</span><b>${v}</b></div>`)}
@@ -1178,19 +1181,41 @@ function monthlySeries(rows) {
   return [...by].sort((a, b) => a[0].localeCompare(b[0])).map(([month, m]) => ({
     month, net: m.net, ok: m.ok, aov: m.ok ? m.net / m.ok : 0,
     cancel: m.total ? m.cancel / m.total * 100 : 0, ret: m.total ? m.ret / m.total * 100 : 0,
+    total: m.total, cancelN: m.cancel, retN: m.ret,
   }));
 }
 
-// เทียบเดือนที่เลือก (หรือเดือนล่าสุด) กับเดือนก่อนหน้า
-function deltaOf(series, key, month, kind, lowerIsBetter) {
-  const i = month ? series.findIndex((x) => x.month === month) : series.length - 1;
-  if (i < 1) return null;
-  const cur = series[i][key], prev = series[i - 1][key];
+// รวมตัวชี้วัดของเดือนลำดับ a..b (รวมปลายทั้งสอง)
+function periodAgg(series, a, b) {
+  let net = 0, ok = 0, cancel = 0, ret = 0, total = 0;
+  for (let i = a; i <= b; i++) {
+    const x = series[i];
+    net += x.net; ok += x.ok; cancel += x.cancelN; ret += x.retN; total += x.total;
+  }
+  return { net, ok, aov: ok ? net / ok : 0, cancel: total ? cancel / total * 100 : 0, ret: total ? ret / total * 100 : 0 };
+}
+
+const periodLabel = (series, a, b) => a === b
+  ? monthLabel(series[a].month)
+  : monthLabel(series[a].month) + ' – ' + monthLabel(series[b].month);
+
+// เทียบช่วงเดือนที่เลือกกับช่วงก่อนหน้าที่ยาวเท่ากัน (ไม่เลือก = เดือนล่าสุดเทียบเดือนก่อน)
+function deltaOf(series, key, from, to, kind, lowerIsBetter) {
+  if (!series.length) return null;
+  let a = series.length - 1, b = a;
+  if (from || to) {
+    a = from ? series.findIndex((x) => x.month >= from) : 0;
+    b = to ? series.map((x) => x.month <= to).lastIndexOf(true) : series.length - 1;
+  }
+  if (a < 0 || b < a) return null;
+  const len = b - a + 1, pa = a - len, pb = a - 1;
+  if (pa < 0) return null;
+  const cur = periodAgg(series, a, b)[key], prev = periodAgg(series, pa, pb)[key];
   const diff = kind === 'pp' ? cur - prev : (prev ? (cur - prev) / prev * 100 : null);
   if (diff == null || !Number.isFinite(diff)) return null;
   const good = lowerIsBetter ? diff <= 0 : diff >= 0;
   const text = (diff >= 0 ? '▲ ' : '▼ ') + Math.abs(diff).toFixed(1) + (kind === 'pp' ? ' จุด' : '%');
-  return { text, good, vs: monthLabel(series[i - 1].month) };
+  return { text, good, vs: periodLabel(series, pa, pb) };
 }
 
 function KpiCard({ cls, icon, label, value, delta, spark }) {
@@ -1200,7 +1225,7 @@ function KpiCard({ cls, icon, label, value, delta, spark }) {
     <div class="kpi-foot">
       <span class="delta">${delta
         ? html`<b class=${delta.good ? 'good' : 'bad'}>${delta.text}</b><span>เทียบ ${delta.vs}</span>`
-        : html`<span>ไม่มีเดือนก่อนให้เทียบ</span>`}</span>
+        : html`<span>ไม่มีช่วงก่อนหน้าให้เทียบ</span>`}</span>
       <${Spark} values=${spark} />
     </div>
   </div>`;
@@ -1212,7 +1237,8 @@ function App() {
   const [over, setOver] = useState(false);
   const [region, setRegion] = useState(ALL);
   const [category, setCategory] = useState(ALL);
-  const [month, setMonth] = useState(ALL);
+  const [monthFrom, setMonthFrom] = useState(ALL);
+  const [monthTo, setMonthTo] = useState(ALL);
   const [products, setProducts] = useState(null);   // { name, cost: Map(product_id → unit_cost) }
   const [tab, setTab] = useState('overview');
   const [sample, setSample] = useState(null);
@@ -1263,7 +1289,7 @@ function App() {
           return;
         }
         setFile({ name: f.name, rows: prepare(res.data), total: res.data.length, parseErrors: res.errors.length });
-        setRegion(ALL); setCategory(ALL); setMonth(ALL);
+        setRegion(ALL); setCategory(ALL); setMonthFrom(ALL); setMonthTo(ALL);
       },
       error: (e) => setError('อ่านไฟล์ไม่ได้: ' + e.message),
     });
@@ -1273,11 +1299,15 @@ function App() {
   const categories = useMemo(() => file ? [...new Set(file.rows.map((r) => r.category))].sort((a, b) => a.localeCompare(b, 'th')) : [], [file]);
   const months = useMemo(() => file ? [...new Set(file.rows.map((r) => r.month))].filter((m) => /^\d{4}-\d{2}$/.test(m)).sort() : [], [file]);
   const rows = useMemo(() => file ? file.rows.filter((r) =>
-    (!region || r.region === region) && (!category || r.category === category) && (!month || r.month === month)) : [], [file, region, category, month]);
+    (!region || r.region === region) && (!category || r.category === category) && (!monthFrom || r.month >= monthFrom) && (!monthTo || r.month <= monthTo)) : [], [file, region, category, monthFrom, monthTo]);
   const s = useMemo(() => summarize(rows), [rows]);
   const mega = useMemo(() => megaSummary(rows, products && products.cost), [rows, products]);
-  const summaryJson = useMemo(() => buildSummaryJson(s, mega, !!products, region, category, month), [s, mega, products, region, category, month]);
-  const filtered = region || category || month;
+  const monthRange = !monthFrom && !monthTo ? 'ทุกเดือน'
+    : (monthFrom || months[0]) === (monthTo || months[months.length - 1])
+      ? monthLabel(monthFrom || monthTo, true)
+      : monthLabel(monthFrom || months[0], true) + ' – ' + monthLabel(monthTo || months[months.length - 1], true);
+  const summaryJson = useMemo(() => buildSummaryJson(s, mega, !!products, region, category, monthRange), [s, mega, products, region, category, monthRange]);
+  const filtered = region || category || monthFrom || monthTo;
   const series = useMemo(() => file ? monthlySeries(file.rows.filter((r) => (!region || r.region === region) && (!category || r.category === category))) : [], [file, region, category]);
   const pickTab = (id) => { setTab(id); window.scrollTo({ top: 0 }); };
 
@@ -1321,12 +1351,20 @@ function App() {
             <option value="">ทุกหมวด</option>
             ${categories.map((c) => html`<option key=${c} value=${c}>${c}</option>`)}
           </select></label>
-        <label><span class="vh">เดือน</span>
-          <select id="f-month" value=${month} onChange=${(e) => setMonth(e.target.value)}>
-            <option value="">ทุกเดือน</option>
-            ${months.map((m) => html`<option key=${m} value=${m}>${monthLabel(m, true)}</option>`)}
-          </select></label>
-        ${filtered && html`<button class="btn ghost" onClick=${() => { setRegion(ALL); setCategory(ALL); setMonth(ALL); }}>ล้างตัวกรอง</button>`}
+        <span class="range">
+          <label><span class="vh">ตั้งแต่เดือน</span>
+            <select id="f-from" value=${monthFrom} onChange=${(e) => setMonthFrom(e.target.value)}>
+              <option value="">ตั้งแต่เดือนแรก</option>
+              ${months.filter((m) => !monthTo || m <= monthTo).map((m) => html`<option key=${m} value=${m}>${monthLabel(m, true)}</option>`)}
+            </select></label>
+          <span class="range-sep">ถึง</span>
+          <label><span class="vh">ถึงเดือน</span>
+            <select id="f-to" value=${monthTo} onChange=${(e) => setMonthTo(e.target.value)}>
+              <option value="">ถึงเดือนล่าสุด</option>
+              ${months.filter((m) => !monthFrom || m >= monthFrom).map((m) => html`<option key=${m} value=${m}>${monthLabel(m, true)}</option>`)}
+            </select></label>
+        </span>
+        ${filtered && html`<button class="btn ghost" onClick=${() => { setRegion(ALL); setCategory(ALL); setMonthFrom(ALL); setMonthTo(ALL); }}>ล้างตัวกรอง</button>`}
       </div>`}
       ${picker}
     </header>
@@ -1347,15 +1385,15 @@ function App() {
     ${file && html`<${React.Fragment}>
       <section class="kpis" aria-label="ตัวชี้วัดหลัก">
         <${KpiCard} cls="k-net" icon="net" label="ยอดขายสุทธิ" value=${baht(s.net, 0)}
-          delta=${deltaOf(series, 'net', month, '%', false)} spark=${series.map((x) => x.net)} />
+          delta=${deltaOf(series, 'net', monthFrom, monthTo, '%', false)} spark=${series.map((x) => x.net)} />
         <${KpiCard} cls="k-ok" icon="orders" label="คำสั่งซื้อสำเร็จ" value=${int(s.okCount)}
-          delta=${deltaOf(series, 'ok', month, '%', false)} spark=${series.map((x) => x.ok)} />
+          delta=${deltaOf(series, 'ok', monthFrom, monthTo, '%', false)} spark=${series.map((x) => x.ok)} />
         <${KpiCard} cls="k-aov" icon="aov" label="AOV" value=${baht(s.aov)}
-          delta=${deltaOf(series, 'aov', month, '%', false)} spark=${series.map((x) => x.aov)} />
+          delta=${deltaOf(series, 'aov', monthFrom, monthTo, '%', false)} spark=${series.map((x) => x.aov)} />
         <${KpiCard} cls="k-cancel" icon="cancel" label="อัตรายกเลิก" value=${s.cancelRate.toFixed(2) + '%'}
-          delta=${deltaOf(series, 'cancel', month, 'pp', true)} spark=${series.map((x) => x.cancel)} />
+          delta=${deltaOf(series, 'cancel', monthFrom, monthTo, 'pp', true)} spark=${series.map((x) => x.cancel)} />
         <${KpiCard} cls="k-return" icon="ret" label="อัตราคืนสินค้า" value=${s.returnRate.toFixed(2) + '%'}
-          delta=${deltaOf(series, 'ret', month, 'pp', true)} spark=${series.map((x) => x.ret)} />
+          delta=${deltaOf(series, 'ret', monthFrom, monthTo, 'pp', true)} spark=${series.map((x) => x.ret)} />
       </section>
 
       <div class="check" aria-label="ตรวจสอบข้อมูล">
